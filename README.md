@@ -11,7 +11,7 @@ Adaptyvus ~10 min klausimynas vadovų komandoms. Viešas puslapis: https://krisi
 2. Ištrinkite pavyzdinį kodą ir įklijuokite `apps-script.gs` turinį. Išsaugokite (Ctrl/Cmd+S), pavadinkite „Friisberg diagnostika“.
 3. **Deploy → New deployment**. Tipas: **Web app**. *Execute as*: **Me**. *Who has access*: **Anyone**. Spauskite **Deploy** ir patvirtinkite prieigą (Google parodys „unverified app“ įspėjimą – Advanced → Go to … → Allow; tai Jūsų pačios skriptas).
 4. Nukopijuokite **Web app URL** (`https://script.google.com/macros/s/…/exec`).
-5. Įrašykite jį į `index.html` eilutę `const ENDPOINT = ''` (arba atsiųskite man – įrašysiu).
+5. Įrašykite jį į `index.html` eilutę `const ENDPOINT = ...`. (Įdiegta 2026-11-03: Apps Script projektas „Friisberg diagnostika“ Kristinos Google paskyroje.)
 
 Nuo tada kiekvienas vadovas, baigęs klausimyną, atsakymus išsiunčia automatiškai; konsultanto vaizde „Komandos rezultatai“ spaudžiate **Atnaujinti iš Google Sheets**.
 
