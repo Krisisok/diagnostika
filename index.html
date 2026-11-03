@@ -501,7 +501,7 @@ function renderBank(){
 }
 function renderAgg(){
   // remote rows: newest per respondent id, filtered by organisation
-  const latest={}; B.remote.forEach(r=>{ if(B.org&&r.org!==B.org) return; const k=r.rid||r.code; if(!latest[k]||latest[k].t<r.t) latest[k]=r });
+  const latest={}; B.remote.forEach(r=>{ if(B.org&&r.org!==B.org) return; const k=r.rid||r.code; if(!latest[k]||(Date.parse(latest[k].t)||0)<(Date.parse(r.t)||0)) latest[k]=r });
   const remoteCodes=Object.values(latest).map(r=>r.code);
   const codes=[...remoteCodes,...B.codes.split(/\s+/).filter(Boolean)]; const res=codes.map(decodeResult).filter(Boolean);
   const orgs=[...new Set(B.remote.map(r=>r.org).filter(Boolean))].sort();
@@ -561,9 +561,11 @@ async function submitResult(payload){
   if(S.sent){ setSendStatus('<p><b style="color:var(--good)">✓ Atsakymai perduoti konsultantui.</b> <span class="small muted">Daugiau nieko daryti nereikia.</span></p>'); return }
   setSendStatus('<p class="small muted">Siunčiame atsakymus konsultantui…</p>');
   try{
-    const r=await fetch(ENDPOINT,{method:'POST',body:JSON.stringify(payload)});
-    let ok=r.ok; try{ ok=ok&&(await r.json()).ok!==false }catch(e){}
-    if(!ok) throw new Error('bad response');
+    // Apps Script answers a POST with a redirect; send it opaque, then confirm by reading the row back.
+    await fetch(ENDPOINT,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)});
+    let found=false;
+    for(let i=0;i<3&&!found;i++){ await new Promise(r=>setTimeout(r,1200*(i+1))); try{ const rows=await fetchRemote(payload.org); found=rows.some(r=>r.rid===payload.rid) }catch(e){} }
+    if(!found) throw new Error('not confirmed');
     S.sent=true; save();
     setSendStatus('<p><b style="color:var(--good)">✓ Atsakymai perduoti konsultantui.</b> <span class="small muted">Daugiau nieko daryti nereikia.</span></p>');
   }catch(e){
