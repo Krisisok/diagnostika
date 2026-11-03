@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Friisberg Organizacijos Diagnostika</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Ubuntu:wght@300;400;500;700&display=swap">
+<style>
+/* Layout: one centred column (max 760px) for the respondent flow; a wider (1100px) working area for the consultant backend. Brand: Friisberg navy + magenta, Marcellus headings, Ubuntu body. */
+:root{
+  --bg:#F3F4F7; --surface:#FFFFFF; --surface-2:#ECEEF2; --ink:#2E3138; --ink-2:#5C6472; --muted:#8A93A3;
+  --navy:#00286C; --navy-ink:#00286C; --magenta:#FF0084; --blue:#0074DB; --line:#C9CFD8; --line-2:#E3E6EC;
+  --good:#1E8E4B; --warn:#D98A00; --crit:#C8323B; --mid:#0074DB;
+  --font-display:'Marcellus',Georgia,'Times New Roman',serif; --font-body:'Ubuntu','Helvetica Neue',Arial,sans-serif;
+  --radius:6px; --shadow:0 1px 2px rgba(0,40,108,.06),0 6px 20px rgba(0,40,108,.06);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0E1424; --surface:#172036; --surface-2:#1F2A45; --ink:#E7EAF0; --ink-2:#B3BBC9; --muted:#8792A6;
+  --navy:#00286C; --navy-ink:#A9C0F2; --magenta:#FF4DA6; --blue:#4F9EF0; --line:#2E3A58; --line-2:#263150;
+  --good:#4CC472; --warn:#F2B344; --crit:#F0636B; --mid:#4F9EF0; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0E1424; --surface:#172036; --surface-2:#1F2A45; --ink:#E7EAF0; --ink-2:#B3BBC9; --muted:#8792A6;
+  --navy:#00286C; --navy-ink:#A9C0F2; --magenta:#FF4DA6; --blue:#4F9EF0; --line:#2E3A58; --line-2:#263150;
+  --good:#4CC472; --warn:#F2B344; --crit:#F0636B; --mid:#4F9EF0; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  color-scheme:dark }
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--navy)}
+h1,h2,h3{font-family:var(--font-display);font-weight:400;color:var(--navy-ink);margin:0;text-wrap:balance;line-height:1.2}
+h1{font-size:clamp(1.7rem,4vw,2.4rem)} h2{font-size:1.5rem} h3{font-size:1.15rem}
+p{margin:0}
+button{font:inherit;cursor:pointer}
+a{color:var(--blue)}
+.eyebrow{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--magenta);font-weight:500}
+.muted{color:var(--ink-2)} .small{font-size:.85rem}
+.tabular{font-variant-numeric:tabular-nums}
+
+/* top bar */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--navy);color:#fff;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px}
+.topbar-in{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:#fff}
+.brand-mark{width:34px;height:34px;border-radius:50%;border:2px solid #fff;position:relative;flex:none;overflow:hidden}
+.brand-mark::after{content:"";position:absolute;inset:4px;border-radius:50%;background:conic-gradient(from 200deg,#FF0084 0 35%,transparent 35% 100%)}
+.brand-name{font-family:var(--font-display);letter-spacing:.06em;font-size:.95rem;line-height:1.1}
+.brand-name small{display:block;font-family:var(--font-body);font-size:.62rem;letter-spacing:.2em;opacity:.8}
+.topbar nav{display:flex;gap:6px;flex-wrap:wrap}
+.topbar nav button{background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:999px;padding:6px 14px;font-size:.82rem}
+.topbar nav button[aria-current="true"]{background:#fff;color:var(--navy);border-color:#fff}
+.topbar nav button:focus-visible,button:focus-visible{outline:2px solid var(--magenta);outline-offset:2px}
+
+.wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 64px}
+.wrap.wide{max-width:1100px}
+.card{background:var(--surface);border:1px solid var(--line-2);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px}
+@media (max-width:480px){.card{padding:20px}}
+.stack{display:grid;gap:20px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.spread{justify-content:space-between}
+
+.btn{border:1px solid var(--navy);background:var(--navy);color:#fff;border-radius:4px;padding:11px 22px;font-weight:500;font-size:.95rem;letter-spacing:.02em;transition:background .15s}
+.btn:hover{background:#003a94}
+.btn.ghost{background:transparent;color:var(--navy-ink);border-color:var(--line)}
+.btn.ghost:hover{background:var(--surface-2)}
+.btn.accent{background:var(--magenta);border-color:var(--magenta)}
+.btn.accent:hover{background:#d9006f}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.sm{padding:7px 14px;font-size:.85rem}
+
+/* intro */
+.hero{display:grid;gap:18px}
+.hero-rule{height:3px;width:56px;background:var(--magenta)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:8px}
+.fact{border-top:1px solid var(--line);padding-top:10px}
+.fact b{display:block;font-family:var(--font-display);font-size:1.5rem;color:var(--navy-ink);font-weight:400}
+.fact span{font-size:.82rem;color:var(--ink-2)}
+
+/* choice grids */
+.choices{display:grid;gap:10px}
+.choices.two{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.choice{display:flex;gap:12px;align-items:flex-start;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;color:var(--ink);transition:border-color .15s,background .15s;min-width:0}
+.choice:hover{border-color:var(--blue)}
+.choice[aria-pressed="true"]{border-color:var(--navy-ink);background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--navy-ink)}
+.choice .dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex:none;margin-top:3px;position:relative}
+.choice[aria-pressed="true"] .dot{border-color:var(--navy-ink)}
+.choice[aria-pressed="true"] .dot::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--magenta)}
+.choice b{display:block;font-weight:500}
+.choice small{display:block;color:var(--ink-2);font-size:.82rem;margin-top:2px}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:7px 14px;font-size:.88rem;display:inline-flex;gap:8px;align-items:center}
+.chip[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
+.chip .n{font-size:.72rem;opacity:.75}
+.chip:disabled{opacity:.4;cursor:not-allowed}
+
+/* question */
+.progress{height:4px;background:var(--line-2);border-radius:2px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--magenta);transition:width .3s}
+.qmeta{display:flex;justify-content:space-between;gap:12px;font-size:.8rem;color:var(--ink-2);flex-wrap:wrap}
+.qtext{font-size:1.25rem;line-height:1.4;color:var(--ink);font-weight:400}
+.answers{display:grid;gap:10px}
+.answer{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;color:var(--ink);display:flex;gap:14px;align-items:center;transition:border-color .15s,transform .05s}
+.answer:hover{border-color:var(--navy-ink)}
+.answer:active{transform:scale(.995)}
+.answer .k{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:.75rem;color:var(--ink-2);flex:none}
+.answer[aria-pressed="true"]{border-color:var(--navy-ink);background:var(--surface-2)}
+.answer[aria-pressed="true"] .k{background:var(--navy);color:#fff;border-color:var(--navy)}
+.branch-note{font-size:.8rem;color:var(--ink-2);border-left:2px solid var(--magenta);padding-left:10px}
+
+/* result */
+.score-hero{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center}
+.ring{width:110px;height:110px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--ring-c,var(--navy)) calc(var(--p,0)*1%),var(--line-2) 0);flex:none}
+.ring i{width:84px;height:84px;border-radius:50%;background:var(--surface);display:grid;place-items:center;font-family:var(--font-display);font-size:1.6rem;color:var(--navy-ink);font-style:normal}
+.bars{display:grid;gap:12px}
+.bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center}
+.bar .lbl{font-size:.9rem;min-width:0}
+.bar .val{font-size:.85rem;color:var(--ink-2);text-align:right;white-space:nowrap}
+.bar .track{grid-column:1/-1;height:8px;background:var(--line-2);border-radius:4px;overflow:hidden}
+.bar .track i{display:block;height:100%;border-radius:4px;background:var(--bar-c,var(--navy))}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.72rem;font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:#fff;background:var(--pill,var(--navy))}
+.codebox{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem;background:var(--surface-2);border:1px solid var(--line-2);border-radius:4px;padding:12px;word-break:break-all;user-select:all;max-height:120px;overflow:auto}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 18px;border-radius:999px;font-size:.88rem;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+
+/* backend */
+.subnav{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:24px}
+.subnav button{background:none;border:0;border-bottom:2px solid transparent;padding:10px 14px;color:var(--ink-2);font-size:.9rem;margin-bottom:-1px}
+.subnav button[aria-current="true"]{color:var(--navy-ink);border-bottom-color:var(--magenta);font-weight:500}
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;counter-reset:step}
+.flow .step{background:var(--surface);border:1px solid var(--line-2);border-radius:var(--radius);padding:14px;position:relative;min-width:0}
+.flow .step::before{counter-increment:step;content:counter(step);position:absolute;top:-10px;left:12px;background:var(--magenta);color:#fff;font-size:.7rem;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-weight:500}
+.flow .step h3{font-size:1rem;margin-top:4px;margin-bottom:6px}
+.flow .step p{font-size:.82rem;color:var(--ink-2)}
+.rule-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.rule{border-left:3px solid var(--navy-ink);background:var(--surface);padding:12px 14px;border-radius:0 var(--radius) var(--radius) 0;border-top:1px solid var(--line-2);border-right:1px solid var(--line-2);border-bottom:1px solid var(--line-2)}
+.rule b{display:block;font-weight:500;margin-bottom:4px}
+.rule p{font-size:.85rem;color:var(--ink-2)}
+.rule.m{border-left-color:var(--magenta)}
+
+.tree{display:grid;gap:14px}
+.tnode{border:1px solid var(--line-2);background:var(--surface);border-radius:var(--radius);padding:14px 16px}
+.tnode-h{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline}
+.tnode-h h3{font-size:1.05rem}
+.tag{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:3px;border:1px solid var(--line);color:var(--ink-2);white-space:nowrap}
+.tag.gate{border-color:var(--navy-ink);color:var(--navy-ink)} .tag.verify{border-color:var(--good);color:var(--good)} .tag.drill{border-color:var(--magenta);color:var(--magenta)} .tag.core{border-color:var(--blue);color:var(--blue)}
+.branches{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:12px}
+.br{border-top:2px solid var(--line);padding-top:10px}
+.br.yes{border-top-color:var(--good)} .br.no{border-top-color:var(--magenta)}
+.br .cond{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;font-weight:500;margin-bottom:6px}
+.br.yes .cond{color:var(--good)} .br.no .cond{color:var(--magenta)}
+.qline{font-size:.86rem;padding:6px 0 6px 12px;border-left:1px solid var(--line);margin-left:4px;color:var(--ink)}
+.qline .id{font-family:ui-monospace,Menlo,monospace;font-size:.72rem;color:var(--muted);margin-right:6px}
+.gateq{font-size:.95rem;margin-top:6px}
+.gateq .id{font-family:ui-monospace,Menlo,monospace;font-size:.72rem;color:var(--muted);margin-right:6px}
+
+.tablewrap{overflow-x:auto;border:1px solid var(--line-2);border-radius:var(--radius);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.84rem}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line-2);text-align:left;vertical-align:top}
+th{font-weight:500;color:var(--ink-2);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;background:var(--surface-2);position:sticky;top:0}
+td.c,th.c{text-align:center}
+.mx{width:26px;height:26px;border-radius:4px;border:1px solid var(--line);background:var(--surface);color:transparent;display:inline-grid;place-items:center}
+.mx[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
+.mx::after{content:"✓";font-size:.8rem}
+select,input[type=text],textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:8px 10px}
+textarea{width:100%;min-height:120px;font-family:ui-monospace,Menlo,monospace;font-size:.78rem}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line-2);border-radius:var(--radius);padding:12px 14px}
+.kpi b{display:block;font-family:var(--font-display);font-size:1.5rem;font-weight:400;color:var(--navy-ink)}
+.kpi span{font-size:.78rem;color:var(--ink-2)}
+.dist{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px;background:var(--line-2)}
+.dist i{display:block;height:100%}
+.legend{display:flex;gap:14px;font-size:.78rem;color:var(--ink-2);flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.hint{background:var(--surface-2);border-radius:var(--radius);padding:12px 14px;font-size:.86rem;color:var(--ink-2)}
+footer{max-width:1100px;margin:0 auto;padding:24px max(16px,env(safe-area-inset-left,0px)) 40px max(16px,env(safe-area-inset-right,0px));font-size:.78rem;color:var(--muted);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+footer button{background:none;border:0;color:var(--muted);text-decoration:underline;padding:0;font-size:.78rem}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="https://friisberg.com" target="_blank" rel="noopener"><span class="brand-mark" aria-hidden="true"></span><span class="brand-name">FRIISBERG &amp; PARTNERS<small>INTERNATIONAL</small></span></a>
+    <nav aria-label="Vaizdas"><button id="nav-survey" aria-current="true">Klausimynas</button><button id="nav-backend" aria-current="false">Metodika (konsultantui)</button></nav>
+  </div>
+</header>
+
+<main id="survey" class="wrap"></main>
+<main id="backend" class="wrap wide" hidden></main>
+<footer><span>Organizacijos diagnostika · Friisberg &amp; Partners · v1 (2026)</span><span>Klausimų bankas: Audito klausimynas v1 (2024-10-31)</span></footer>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ===================== DATA ===================== */
+/* ===================== CONFIG ===================== */
+const ENDPOINT = ''; // Google Apps Script Web app URL (žr. README.md). Tuščia = atsakymai perduodami kodu.
+const ORG_PARAM = (new URLSearchParams(location.search).get('org')||'').trim();
+const newRid = ()=>'r'+Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4);
+const BANK = [{"id": "Q1", "grp": "hr", "top": false, "vad": false, "hr": true, "tema": "Darbuotojų įsitraukimas", "kat": "Įgyvendinimas", "q": "Mūsų darbuotojų savanoriškos kaitos metinis rodiklis", "opts": [["Atitinka bendrą industrijos lygį", 1], ["Per mažas", 0.5], ["Per didelis", 0]]}, {"id": "Q2", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Darbuotojų įsitraukimas", "kat": "Įgyvendinimas", "q": "Darbuotojai dažniausiai palieka jūsų organizaciją dėl", "opts": [["AUKŠTESNĖS POZICIJOS / KARJEROS / GERESNIŲ DARBO SĄLYGŲ", 1], ["DIDESNIO ATLYGINIMO", 0.5], ["ORGANIZACIJOS KULTŪROS / VADOVŲ KOMPETENCIJOS", 0]]}, {"id": "Q3", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Darbuotojų įsitraukimas", "kat": "Įgyvendinimas", "q": "Mūsų darbuotojai yra įsitraukę", "opts": [["Labiau, nei daugumoje kitų organizacijų", 1], ["Vidutiniškai kaip ir kitose organizacijose", 0.5], ["Mažiau, nei mes norėtume (arba nežinome)", 0]]}, {"id": "Q4", "grp": "hr", "top": false, "vad": false, "hr": true, "tema": "Darbuotojų įsitraukimas", "kat": "Procesai / įrankiai", "q": "Ne rečiau nei kartą per metus atliekame anoniminę darbuotojų apklausą (įsitraukimo, pasitenkinimo, nuomonės tyrimą ar pan.)", "opts": [["Taip", 1], ["Esame atlikę seniau", 0.5], ["Ne", 0]]}, {"id": "Q5", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atlygis ir papildomos naudos", "kat": "Strategija", "q": "Žinome su kuo mūsų kompanija konkuruoja dėl darbuotojų", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q6", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atlygis ir papildomos naudos", "kat": "Įgyvendinimas", "q": "Vadovų komanda žino, su kuo mūsų kompanija konkuruoja dėl darbuotojų", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q7", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atlygis ir papildomos naudos", "kat": "Strategija", "q": "Žinome, koks mūsų konkuravimo rinkoje dėl darbuotojų išskirtinumas", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q8", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atlygis ir papildomos naudos", "kat": "Įgyvendinimas", "q": "Esame sutarę tarp vadovų ir įvardiję, koks mūsų konkuravimo dėl darbuotojų išskirtinumas", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q9", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atlygis ir papildomos naudos", "kat": "Įgyvendinimas", "q": "Sutarus atlygio ribas nedarote išimčių", "opts": [["Nedarome", 1], ["PAVIENES, mažiau nei 1 iš 10 darbuotojų atlyginamas išimtinai", 0.5], ["Darome", 0]]}, {"id": "Q10", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atlygis ir papildomos naudos", "kat": "Procesai / įrankiai", "q": "Mūsų atlygio struktūra (dalys) ir sistema (principai) padeda kompanijai įgyvendinti strategiją", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "Q11", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atlygis ir papildomos naudos", "kat": "Procesai / įrankiai", "q": "Atlygis susietas sudarbuotojų rezultatyvumu", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q12", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atlygis ir papildomos naudos", "kat": "Procesai / įrankiai", "q": "Atlygis susietas sudarbuotojų kompetencijomis", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q13", "grp": "hr", "top": true, "vad": false, "hr": true, "tema": "Atlygis ir papildomos naudos", "kat": "Strategija", "q": "Turime atlygio politiką arba atlygio strategijos gaires suprantamas aukščiausio lygio vadovams", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "Q14", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atlygis ir papildomos naudos", "kat": "Įgyvendinimas", "q": "Turime atlygio politiką arba atlygio strategijos gaires suprantamas visiems įmonės vadovams", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "Q15", "grp": "hr", "top": false, "vad": true, "hr": true, "tema": "Atlygis ir papildomos naudos", "kat": "Įgyvendinimas", "q": "Turime atlygio politiką arba atlygio strategijos gaires suprantamas visiems darbuotojams", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "Q16", "grp": "hr", "top": false, "vad": false, "hr": true, "tema": "Atlygis ir papildomos naudos", "kat": "Procesai / įrankiai", "q": "Mūsų kompanija yra dalyvavusi atlygio rinkos tyrimuose", "opts": [["Taip, dalyvaujame reguliariai", 1], ["Esame seniai dalyvavę", 0.5], ["Ne", 0]]}, {"id": "Q17", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atlygis ir papildomos naudos", "kat": "Įgyvendinimas", "q": "Peržiūrime darbuotojų atlygį reguliariai, bent kartą per metus", "opts": [["Taip", 1], ["Peržiūrime reguliariai, rečiau nei kartą per metus", 0.5], ["Peržiūrime pagal poreikį", 0]]}, {"id": "Q18", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atlygis ir papildomos naudos", "kat": "Procesai / įrankiai", "q": "Mūsų darbuotojai žino savo pozicijos vertę, t.y. pozicijos atlygio ribas", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q19", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atlygis ir papildomos naudos", "kat": "Procesai / įrankiai", "q": "Mūsų darbuotojai žino kitų pozicijų vertes, t.y. pozicijos atlygio ribas", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q20", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atlygis ir papildomos naudos", "kat": "Procesai / įrankiai", "q": "Msų organizacija turi kintamo atlygio schemas (bonusus, premijas, pelno dalybas, akcijas ar kt.)", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q21", "grp": "hr", "top": true, "vad": false, "hr": true, "tema": "Atlygis ir papildomos naudos", "kat": "Įgyvendinimas", "q": "Išmokėjus kintamą atlygį (bonusus, premijas, pelno dalybas, akcijas ar kt.) analizuojate išmokų dydį ir individualius komandų, organizacijos rezultatus", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q22", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atlygis ir papildomos naudos", "kat": "Procesai / įrankiai", "q": "Organizacijoje taikote papildomas naudas (sveikatos draudimą, papildomas atostogų dienas, laisvalaikio ar sporto programų kompensavimą ar kt.)", "opts": [["Taip, turime papildomų naudų krepšelį", 1], ["Turime kelias papildomas naudas", 0.5], ["Ne", 0]]}, {"id": "Q23", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atlygis ir papildomos naudos", "kat": "Įgyvendinimas", "q": "Skaičiuojame organizacijos papildomų naudų krepšelio vertę ir ją komunikuojame darbuotojams", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q24", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atlygis ir papildomos naudos", "kat": "Įgyvendinimas", "q": "Skiriame dėmesio viso atlygio komunikacijai organizacijoje", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q25", "grp": "hr", "top": false, "vad": false, "hr": true, "tema": "Atranka", "kat": "Procesai / įrankiai", "q": "Aprašytas atrankos procesas ar schema", "opts": [["Taip, juo ir vadovaujamės", 1], ["Taip, turime aprašą, bet realybė kiek kitokia", 0.5], ["Ne", 0]]}, {"id": "Q26", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atranka", "kat": "Įgyvendinimas", "q": "Paskelbus atranką visada informuojami įmonės darbuotojai sudarant galimybes kandidatuoti jiems", "opts": [["Taip, su retomis išimtimis", 1], ["Kartais", 0.5], ["Ne", 0]]}, {"id": "Q27", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atranka", "kat": "Procesai / įrankiai", "q": "Veikia rekomendavimo programa", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q28", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atranka", "kat": "Įgyvendinimas", "q": "Atliekamas pusiau struktūruotas arba struktūruotas interviu, kai kandidatų paklausiami tie patys klausimais, o atsakymai palyginami", "opts": [["Taip", 1], ["Esu daręs (iusi)", 0.5], ["Ne", 0]]}, {"id": "Q29", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atranka", "kat": "Įgyvendinimas", "q": "Interviu metu tikrinama konkrečių iš anksto apibrėžtų kompetencijų ar įgūdžių atitiktis", "opts": [["Taip, visų svarbiausių", 1], ["Vienos, kitos", 0.5], ["Ne", 0]]}, {"id": "Q30", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atranka", "kat": "Įgyvendinimas", "q": "Atrankos procesas nuo paskelbimo iki sutarties sudarymo vidutiniškai trunka 6-8 savaites", "opts": [["Visada", 1], ["Dažniausiai", 0.5], ["Nežinau", 0]]}, {"id": "Q31", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atranka", "kat": "Procesai / įrankiai", "q": "Kandidatui teikiamas raštiškas pasiūlymas atskleidžiant darbo sąlygas", "opts": [["Taip, turime gražų pasiūlymo laišką (formą)", 1], ["Nusiunčiame el.laišką", 0.5], ["Ne", 0]]}, {"id": "Q32", "grp": "hr", "top": false, "vad": false, "hr": true, "tema": "Atranka", "kat": "Įgyvendinimas", "q": "Kandidatų duomenys valdomi vadovaujantis BDAR", "opts": [["Taip", 1], ["Nežinau", 0]]}, {"id": "Q33", "grp": "hr", "top": false, "vad": true, "hr": true, "tema": "Atranka", "kat": "Įgyvendinimas", "q": "Į skelbimą vidutiniškai atsiliepia ne mažiau nei 5 reikalavimus atitinkantys kandidatai", "opts": [["Taip, gerokai daugiau", 1], ["Dažniausiai", 0.5], ["Mažiau nei 5", 0]]}, {"id": "Q34", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atranka", "kat": "Įgyvendinimas", "q": "Esame padarę rimtų samdos klaidų", "opts": [["Ne", 1], ["Taip", 0.5], ["Nežinau", 0]]}, {"id": "Q35", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atranka", "kat": "Įgyvendinimas", "q": "Mokame įvertinti kandidatų techninius įgūdžius", "opts": [["Taip", 1], ["Kai kuriuos", 0.5], ["Ne", 0]]}, {"id": "Q36", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Atranka", "kat": "Įgyvendinimas", "q": "Mokame įvertinti kandidatų bendrąsias kompetencijas ir vertybinę atitiktį", "opts": [["Taip", 1], ["Kai kurias", 0.5], ["Ne", 0]]}, {"id": "Q37", "grp": "hr", "top": false, "vad": true, "hr": true, "tema": "Darbuotojų įvedimas", "kat": "Įgyvendinimas", "q": "Naujokas pasirašo darbo sutartį", "opts": [["Maždaug savaitę prieš darbo pradžią", 1], ["Paskutinę dieną prieš darbą arba pirmą dieną", 0.5], ["Pirmąją savaitę ir vėliau", 0]]}, {"id": "Q38", "grp": "hr", "top": false, "vad": true, "hr": true, "tema": "Darbuotojų įvedimas", "kat": "Įgyvendinimas", "q": "Naujokas gauna visas darbo priemones ir prieigas", "opts": [["Pirmą dieną", 1], ["Pirmą savaitę", 0.5], ["Nežinau", 0]]}, {"id": "Q39", "grp": "hr", "top": false, "vad": true, "hr": true, "tema": "Darbuotojų įvedimas", "kat": "Įgyvendinimas", "q": "Naujokas iki primos darbo dienos supažindinamas su pirmosios savaitės įvedimo planu", "opts": [["Taip", 1], ["Supažindinamas pirmąją darbo dieną", 0.5], ["Ne", 0]]}, {"id": "Q40", "grp": "hr", "top": false, "vad": true, "hr": true, "tema": "Darbuotojų įvedimas", "kat": "Įgyvendinimas", "q": "Naujokas iki pirmosios darbo dienos supažindinamas su bendrąja įmonės informacija (pvz. darbo tvarka, organizacine struktūra)", "opts": [["Taip", 1], ["Supažindinamas pirmąją darbo dieną", 0.5], ["Ne", 0]]}, {"id": "Q41", "grp": "hr", "top": false, "vad": true, "hr": true, "tema": "Darbuotojų įvedimas", "kat": "Procesai / įrankiai", "q": "Turime struktūruotus naujokų mokymus (individualius arba grupėje)", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q42", "grp": "hr", "top": false, "vad": true, "hr": true, "tema": "Darbuotojų įvedimas", "kat": "Procesai / įrankiai", "q": "Naujokui paskiriamas mentorius arba draugas (buddy)", "opts": [["Taip, visada priskiriamas apmokytas mentorius arba buddy", 1], ["Dažniausiai", 0.5], ["Ne", 0]]}, {"id": "Q43", "grp": "hr", "top": false, "vad": true, "hr": true, "tema": "Darbuotojų įvedimas", "kat": "Įgyvendinimas", "q": "Pirmaisiais mėnesiais naujokas ne rečiau kaip kartą per savaitę susitinka su tiesioginiu vadovu aptarti progresą", "opts": [["Taip", 1], ["Dažniausiai", 0.5], ["Ne", 0]]}, {"id": "Q44", "grp": "hr", "top": false, "vad": true, "hr": true, "tema": "Darbuotojų įvedimas", "kat": "Įgyvendinimas", "q": "Ne vėliau, nei per tris mėnesius naujokui iškeliami laikotarpio tikslai ar sutariami svarbiausi vertinimo rodikliai", "opts": [["Taip", 1], ["Dažniausiai", 0.5], ["Ne", 0]]}, {"id": "Q45", "grp": "hr", "top": false, "vad": true, "hr": true, "tema": "Darbuotojų įvedimas", "kat": "Procesai / įrankiai", "q": "Klausiame naujokų grįžtamojo ryšio bent kartą per bandomąjį laikotarpį (anketa arba interviu)", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q46", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Etikos standartai ir elgesio kodeksas", "kat": "Strategija", "q": "Esame apsibrėžę įmonės vertybes (elgsenas), darbuotojai jų laikosi", "opts": [["Taip, vertybes turime ir jų laikomės", 1], ["Turime vertybes, ne visada laikomės", 0.5], ["Ne", 0]]}, {"id": "Q47", "grp": "hr", "top": false, "vad": false, "hr": true, "tema": "Etikos standartai ir elgesio kodeksas", "kat": "Procesai / įrankiai", "q": "Turime etikos kodeksą", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q48", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Etikos standartai ir elgesio kodeksas", "kat": "Įgyvendinimas", "q": "Vertybių atitikties stebėseną esame integravę į darbuotojų veiklos valdymo sistemą", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q49", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Etikos standartai ir elgesio kodeksas", "kat": "Strategija", "q": "Esame lygių galimybių darbdavys", "opts": [["Taip", 1], ["Turime lygių galimybių politiką", 0.5], ["Nežinome", 0]]}, {"id": "Q50", "grp": "hr", "top": false, "vad": false, "hr": true, "tema": "Etikos standartai ir elgesio kodeksas", "kat": "Įgyvendinimas", "q": "Įmonės vadovų komandoje yra panašus vyrų ir moterų skaičius", "opts": [["50 / 50", 1], ["Apylygis", 0.5], ["Proporcija nevienoda", 0]]}, {"id": "Q51", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Etikos standartai ir elgesio kodeksas", "kat": "Procesai / įrankiai", "q": "Peronalo procesai (atrankos, paaukštinimo, atlygio peržiūros) padeda užtikrinti įvairovę ir įtrauktį", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "Q52", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Etikos standartai ir elgesio kodeksas", "kat": "Įgyvendinimas", "q": "Edukuojame savo darbuotojus įvairovės ir įtraukties temomis", "opts": [["Taip, reguliariai", 1], ["Esame tai darę", 0.5], ["Ne", 0]]}, {"id": "Q53", "grp": "hr", "top": true, "vad": false, "hr": true, "tema": "HR kompetencija", "kat": "Strategija", "q": "Žmonių ir kultūros (HR, Personalo) komanda turi savo biudžetą", "opts": [["Taip", 1], ["Ne (arba neturime tokios komandos)", 0]]}, {"id": "Q54", "grp": "hr", "top": true, "vad": false, "hr": true, "tema": "HR kompetencija", "kat": "Įgyvendinimas", "q": "Žmonių ir kultūros (HR, Personalo) komanda yra strateginis verslo partneris", "opts": [["Taip", 1], ["Ne (arba neturime partnerio)", 0]]}, {"id": "Q55", "grp": "hr", "top": true, "vad": false, "hr": true, "tema": "HR kompetencija", "kat": "Įgyvendinimas", "q": "Žmonių ir kultūros (HR, Personalo) vadovas yra aukščiausio vadovų lygio komandos narys", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q56", "grp": "hr", "top": false, "vad": false, "hr": true, "tema": "HR technologijos ir sistemos", "kat": "Procesai / įrankiai", "q": "Darbuotojų įrašai tvarkomi vienoje ar keliose integruotose IT sistemose", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q57", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "HR technologijos ir sistemos", "kat": "Strategija", "q": "Nuolat stebime ir analizuojame darbuotojų rodiklius (pvz. kaita, sergamumas, pozicijos užpildymo laikas, vakancijų užpildymo vidiniais kandidatais %, darbuotojų įstraukimo lygis, kandidatų skaičius, efektyvumas, rezultatyvumas, atlygio konkurencingumas ir kita)", "opts": [["Taip, stebime bent 4 rodiklius", 1], ["Taip, stebime bent 2 rodiklius", 0.5], ["Ne", 0]]}, {"id": "Q58", "grp": "hr", "top": true, "vad": false, "hr": true, "tema": "HR technologijos ir sistemos", "kat": "Procesai / įrankiai", "q": "Veiklos valdymo, atrankos, ugdymo procesai valdomi IT sistemų pagalba", "opts": [["Taip, svarbiausi", 1], ["Kai kurie", 0.5], ["Ne", 0]]}, {"id": "Q59", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Mokymas ir tobulėjimas", "kat": "Procesai / įrankiai", "q": "Turime naujų darbuotojų apmokymo programą (struktūrą)", "opts": [["Taip", 1], ["Turime įvadinį mokymą apie įmonę ir jos veiklą", 0.5], ["Ne", 0]]}, {"id": "Q60", "grp": "hr", "top": true, "vad": false, "hr": true, "tema": "Mokymas ir tobulėjimas", "kat": "Įgyvendinimas", "q": "Reguliariai (ne rečiau nei kartą per metus) vertiname visos įmonės bendras tobulėjimo ir mokymosi sritis", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q61", "grp": "hr", "top": true, "vad": false, "hr": true, "tema": "Mokymas ir tobulėjimas", "kat": "Procesai / įrankiai", "q": "Turime vidinius mokytojus", "opts": [["Taip, esame juos apmokę mokyti", 1], ["Kai kurie darbuotojai kartais moko kitus", 0.5], ["Ne", 0]]}, {"id": "Q62", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Mokymas ir tobulėjimas", "kat": "Įgyvendinimas", "q": "Kiekvienas darbuotojas turi asmeninio augimo ir tobulėjimo planą", "opts": [[">90%", 1], ["bent pusė", 0.5], ["Ne", 0]]}, {"id": "Q63", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Mokymas ir tobulėjimas", "kat": "Procesai / įrankiai", "q": "Darbuotojas turi profesinio tobulėjimo asmeninį biudžetą, kurį naudoja savo nuožiūra", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q64", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Mokymas ir tobulėjimas", "kat": "Įgyvendinimas", "q": "Organizuojame bendrųjų kompetencijų ir įgūdžių mokymo programas", "opts": [["Taip, reguliariai", 1], ["Esame organizavę", 0.5], ["Ne", 0]]}, {"id": "Q65", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Mokymas ir tobulėjimas", "kat": "Įgyvendinimas", "q": "Kiekvienas darbuotojas per metus mokosi ne mažiau nei", "opts": [["3 dienas", 1], ["1 dieną", 0.5], ["Nežinau", 0]]}, {"id": "Q66", "grp": "hr", "top": false, "vad": false, "hr": true, "tema": "Mokymas ir tobulėjimas", "kat": "Procesai / įrankiai", "q": "Darbuotojų mokymuisi naudojame mokymosi platformas ir e-kursus", "opts": [["Taip", 1], ["E-kursus", 0.5], ["Ne", 0]]}, {"id": "Q67", "grp": "hr", "top": true, "vad": false, "hr": true, "tema": "Mokymas ir tobulėjimas", "kat": "Strategija", "q": "Turime įmonės mokymų ir tobulėjimo biudžetą", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q68", "grp": "hr", "top": true, "vad": false, "hr": true, "tema": "Mokymas ir tobulėjimas", "kat": "Įgyvendinimas", "q": "Vertiname įvykusių mokymų efektyvumą", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q69", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Organizacinė struktūra", "kat": "Strategija", "q": "Turime vizualizuotą organizacinę struktūrą (apimančią padalinių ir pareigų pavadinimus, nurodant pavaldumo ryšius, darbuotojų skaičių)", "opts": [["Taip", 1], ["Turime grafinį atvaizdavimą su kai kuriais paminėtais elementais", 0.5], ["Ne", 0]]}, {"id": "Q70", "grp": "hr", "top": false, "vad": false, "hr": true, "tema": "Organizacinė struktūra", "kat": "Įgyvendinimas", "q": "Aktuali organizacinė struktūra prieinama visiems darbuotojams (pvz. patalpinta įmonės puslapyje ar intranete)", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q71", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Organizacinė struktūra", "kat": "Įgyvendinimas", "q": "Struktūrinių vienetų ir pareigybių pavadinimai atspindi veiklos sritį, atsakomybės lygį, geografiją", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "Q72", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Organizacinė struktūra", "kat": "Įgyvendinimas", "q": "Optimali valdymo aprėptis - daudumą komandų sudaro vadovai su tiesiogiai pavaldžiais 10-15 darbuotojų", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q73", "grp": "hr", "top": true, "vad": false, "hr": true, "tema": "Organizacinė struktūra", "kat": "Strategija", "q": "Optimalus organizacijos lygių skaičius (3 lygiai, įskaitant vadovą, kai darb.sk.<50, 4, kai 50-199, 5, kai >200)", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q74", "grp": "hr", "top": true, "vad": false, "hr": true, "tema": "Talentų valdymas", "kat": "Strategija", "q": "Kiekvienas aukščiausio lygio vadovų komandos narys turi identifikuotą paveldėtoją (žmogų, kuris pakeis išėjusi vadovą)", "opts": [["Taip", 1], ["Kai kurie", 0.5], ["Ne", 0]]}, {"id": "Q75", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Talentų valdymas", "kat": "Įgyvendinimas", "q": "Esame identifikavę potencialiausius ir rezultatyviausius darbuotojus (žvaigždes), jų išlaikymui ir ugdymui teikiame prioritetą", "opts": [["Taip", 1], ["Esame identifikavę, tačiau veiksmų nesiimame", 0.5], ["Ne", 0]]}, {"id": "Q76", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Talentų valdymas", "kat": "Procesai / įrankiai", "q": "Žinome kritines pareigybes, kurių pakaitumas užtikrintas ugdant ar samdant paveldėtojus", "opts": [["Taip", 1], ["Žinome, tačiau veiksmų nesiimame", 0.5], ["Ne", 0]]}, {"id": "Q77", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Talentų valdymas", "kat": "Strategija", "q": "Talentų ugdymas mums yra prioritetas", "opts": [["Talentams skiriams didesnis ugdymo biudžetas ir pirmumas", 1], ["Talentų ugdymui skiriame daugiau dėmesio", 0.5], ["Neišskiriame talentų ugdymo iš kitų darbuotojų", 0]]}, {"id": "Q78", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Talentų valdymas", "kat": "Įgyvendinimas", "q": "Svarbiausias pozicijas užima organizacijoje užaugę žmonės", "opts": [[">50% užpildo vidiniai kandidatai", 1], ["Turime sėkmės atvejų, kai pozicijas užima vidiniai kandidatai", 0.5], ["Dažniausia samdome iš išorės", 0]]}, {"id": "Q79", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Talentų valdymas", "kat": "Procesai / įrankiai", "q": "Apie priežastis kodėl darbuotojai palieka organizaciją žinome iš", "opts": [["Atliekamo išėjimo interviu", 1], ["Išėjimo interviu neatliekame, gerai žinome savo žmones", 0]]}, {"id": "Q80", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Talentų valdymas", "kat": "Procesai / įrankiai", "q": "Reaguojame į išeinančių žmonių grįžtamąjį ryšį", "opts": [["Išeinančių grįžtamojo ryšio tendencijas reguliariai aptariame vadovų komandoje ir imamės reikalingų veiksmų", 1], ["Darome išėjimo interviu su kiekvienu išeinančiu", 0.5], ["Pasikalbame su išeinančiais žmonėmis pagal poreikį", 0]]}, {"id": "Q81", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Santykiai su darbuotojais", "kat": "Įgyvendinimas", "q": "Darbuotojai žino kur gali saugiai skųstis įmonės viduje kilus problemoms ir kad jų skundas bus nešališkai išnagrinėtas ir sprendžiamas", "opts": [["Taip, visi skundai išnagrinėjami nešališkai", 1], ["Taip, kai kurie skundai išnagrinėjami nešališkai, tačiau neturime tvarkos ir paskirto asmens", 0.5], ["Ne", 0]]}, {"id": "Q82", "grp": "hr", "top": false, "vad": true, "hr": true, "tema": "Santykiai su darbuotojais", "kat": "Strategija", "q": "Turime smurto ir priekabiavimo prevencijos politiką", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q83", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Santykiai su darbuotojais", "kat": "Įgyvendinimas", "q": "Nesitaikome su netinkamu elgesiu bet kuriame organizacijos lygmenyje, net jei darbuotojas ar vadovas yra rezultatyvus ir kompetentingas", "opts": [["Taip", 1], ["Jei darbuotojas ar vadovas rezultatyus ir kompetentingas, kartais užmerkiame akis netinkamam elgesiui", 0.5], ["Ne", 0]]}, {"id": "Q84", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Santykiai su darbuotojais", "kat": "Įgyvendinimas", "q": "Darbuotojai drąsiai ir atvirai kalba apie problemas nepaisydami lygių ir titulų", "opts": [["Taip, dauguma", 1], ["Taip, kai kurie", 0.5], ["Ne", 0]]}, {"id": "Q85", "grp": "hr", "top": false, "vad": false, "hr": true, "tema": "Santykiai su darbuotojais", "kat": "Strategija", "q": "Įmonėje veikia darbuotojų atstovai (darbo taryba, profesinė sąjunga)", "opts": [["Taip", 1], ["Yra, tačiau veikia formaliai", 0.5], ["Ne", 0]]}, {"id": "Q86", "grp": "hr", "top": true, "vad": false, "hr": true, "tema": "Santykiai su darbuotojais", "kat": "Įgyvendinimas", "q": "Priimdami svarbius su darbuotojų gerove susijusius sprendimus, konsultuojamės su darbuotojų atstovais", "opts": [["Taip", 1], ["Konsultuojamės formaliai", 0.5], ["Ne", 0]]}, {"id": "Q87", "grp": "hr", "top": false, "vad": true, "hr": true, "tema": "Santykiai su darbuotojais", "kat": "Procesai / įrankiai", "q": "Įmonėje veikia darbuotojų savipagalbos grupė", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q88", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Sveikata ir sauga", "kat": "Procesai / įrankiai", "q": "Įmonėje yra darbų saugos tvarka, kurią žino visi darbuotojai", "opts": [["Taip", 1], ["Tvarka yra, darbuotojai supažindinami pasirašytinai", 0.5], ["Ne", 0]]}, {"id": "Q89", "grp": "hr", "top": false, "vad": true, "hr": true, "tema": "Sveikata ir sauga", "kat": "Įgyvendinimas", "q": "Darbuotojai raportuoja saugos incidentus", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q90", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Sveikata ir sauga", "kat": "Įgyvendinimas", "q": "Stebime darbų saugos metrikas", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q91", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Sveikata ir sauga", "kat": "Įgyvendinimas", "q": "Atliekame neformalistinę reguliarią sveikatos patikrą", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q92", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Sveikata ir sauga", "kat": "Įgyvendinimas", "q": "Darbuotojai apmokyti suteikti pirmąją pagalbą", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q93", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Sveikata ir sauga", "kat": "Įgyvendinimas", "q": "Darbuotojai naudoja saugos priemones", "opts": [["Taip (arba neaktualu, nes neturime gamybos)", 1], ["Didžioji dauguma", 0.5], ["Dažniausiai", 0]]}, {"id": "Q94", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Teisinė atitiktis", "kat": "Įgyvendinimas", "q": "Laikomės LR DK", "opts": [["Taip", 1], ["Paprastai", 0.5], ["Nežinau", 0]]}, {"id": "Q95", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Teisinė atitiktis", "kat": "Įgyvendinimas", "q": "Laikomės BDAR", "opts": [["Taip", 1], ["Paprastai", 0.5], ["Nežinau", 0]]}, {"id": "Q96", "grp": "hr", "top": true, "vad": false, "hr": true, "tema": "Teisinė atitiktis", "kat": "Strategija", "q": "Esame pasiruošę ES skaidrumo direktyvai", "opts": [["Taip", 1], ["Kas yra ES skaidrumo direktyva? (ne)", 0]]}, {"id": "Q97", "grp": "hr", "top": true, "vad": false, "hr": true, "tema": "Teisinė atitiktis", "kat": "Strategija", "q": "Esame pasiruošę teikti CSRD ataskaitą (didesnėms, nei 250 darb. 40 mln Eur apyvartos įmonėms)", "opts": [["Taip (arba neaktualu, nes neprivalome)", 1], ["Kas yra CSRD ataskaita?", 0]]}, {"id": "Q98", "grp": "hr", "top": true, "vad": false, "hr": true, "tema": "Teisinė atitiktis", "kat": "Įgyvendinimas", "q": "Darbo sutartys tvarkomos pagal teisės aktus", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Nežinau", 0]]}, {"id": "Q99", "grp": "hr", "top": false, "vad": false, "hr": true, "tema": "Teisinė atitiktis", "kat": "Procesai / įrankiai", "q": "Darbo sutartis pasirašome el.būdu", "opts": [["Taip", 1], ["Tik administracijos", 0.5], ["Ne", 0]]}, {"id": "Q100", "grp": "hr", "top": false, "vad": true, "hr": true, "tema": "Teisinė atitiktis", "kat": "Procesai / įrankiai", "q": "Veikia darbo laiko, nebuvimų valdymo savitarna", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q101", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Darbuotojų veiklos valdymas", "kat": "Strategija", "q": "Įmonėje veikia darbuotojų veiklos valdymo sistema", "opts": [["Taip", 1], ["Turime vertinimo pokalbius", 0.5], ["Ne", 0]]}, {"id": "Q102", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Darbuotojų veiklos valdymas", "kat": "Procesai / įrankiai", "q": "Darbuotojų veiklą (rezultatus, kompetencijas ir elgseną) vertiname iš anksto apibrėžtais kriterijais", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q103", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Darbuotojų veiklos valdymas", "kat": "Procesai / įrankiai", "q": "Rezultatus darbuotojas aptaria reguliariai, ne rečiau nei keturis kartus per metus", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q104", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Darbuotojų veiklos valdymas", "kat": "Įgyvendinimas", "q": "Darbuotojų tikslai susieti su organizacijos tikslais (veda į organizacijos tikslus)", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "Q105", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Darbuotojų veiklos valdymas", "kat": "Įgyvendinimas", "q": "Darbuotojai įtraukiami į tikslų kėlimą (priešingai - tikslai jiems nuleidžiami)", "opts": [["Taip", 1], ["Darbuotojams supažindinami", 0.5], ["Ne", 0]]}, {"id": "Q106", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Darbuotojų veiklos valdymas", "kat": "Įgyvendinimas", "q": "Darbuotojo vertinimas priklauso nuo bent vieno iš šių iš anksto apibrėžtų kriterijų: rezultatyvumas / kompetencijos / įgūdžiai / elgsenos / vertybės", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q107", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Darbuotojų veiklos valdymas", "kat": "Įgyvendinimas", "q": "Darbuotojo pasiekimus vertina vadovas ir pats darbuotojas", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q108", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Darbuotojų veiklos valdymas", "kat": "Įgyvendinimas", "q": "Vertinant darbuotojų veiklą pasitelkiamas grįžtamasis ryšys iš kitų susijusių (pavyzdžiui pavaldinių, kolegų, klientų, partnerių)", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q109", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Darbuotojų veiklos valdymas", "kat": "Procesai / įrankiai", "q": "Turime nerezultatyvių darbuotojų veiklos gerinimo programą", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q110", "grp": "hr", "top": false, "vad": false, "hr": true, "tema": "Darbuotojų veiklos valdymas", "kat": "Procesai / įrankiai", "q": "Veiklos valdyme naudojame 360", "opts": [["Taip", 1], ["360 elementus", 0.5], ["Ne", 0]]}, {"id": "Q111", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Lyderystė", "kat": "Strategija", "q": "Esame aiškiai apsibrėžę lyderių komandą (as)", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q112", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Lyderystė", "kat": "Procesai / įrankiai", "q": "Esame sutarę lyderio savybes", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "Q113", "grp": "hr", "top": true, "vad": false, "hr": true, "tema": "Lyderystė", "kat": "Įgyvendinimas", "q": "Mūsų lyderiai yra pavyzdys visai organizacijai", "opts": [["Taip, dauguma", 1], ["Kai kurie", 0.5], ["Ne", 0]]}, {"id": "Q114", "grp": "hr", "top": true, "vad": true, "hr": true, "tema": "Lyderystė", "kat": "Įgyvendinimas", "q": "Ugdome lyderius nuosekliai investuodami", "opts": [["Taip, turime ilgalaikį ugdymo planą ir ugdymo biudžetą", 1], ["Reguliariai organizuojame mokymus lyderiams", 0.5], ["Ugdome pagal poreikį", 0]]}, {"id": "Q115", "grp": "hr", "top": true, "vad": false, "hr": true, "tema": "Lyderystė", "kat": "Procesai / įrankiai", "q": "Turime lyderių ugdymo programą", "opts": [["Taip", 1], ["Ne", 0]]}, {"id": "T1", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Lyderystė ir vizija", "kat": "Strategija", "q": "Vadovų komanda aiškiai perduoda organizacijos viziją ir strateginius tikslus likusiai organizacijos daliai", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T2", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Lyderystė ir vizija", "kat": "Strategija", "q": "Vadovų komanda rodo pavyzdį, laikydamasi organizacijos vertybių ir kultūros", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T3", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Lyderystė ir vizija", "kat": "Strategija", "q": "Vadovų komanda įkvepia ir motyvuoja darbuotojus siekti organizacijos tikslų", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T4", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Lyderystė ir vizija", "kat": "Strategija", "q": "Vadovų komanda demostruoja vieningą lyderystę", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T5", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Strateginis suderinamumas", "kat": "Strategija", "q": "Vadovų komandos veiksmai ir sprendimai dera su organizacijos strateginiais tikslais", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T6", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Strateginis suderinamumas", "kat": "Strategija", "q": "Vadovų komanda įtraukia pagrindinius suinteresuotuosius asmenis į strategijos kūrimo procesą", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T7", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Strateginis suderinamumas", "kat": "Įgyvendinimas", "q": "Vadovų komanda reguliariai peržiūri ir atnaujina savo strategiją atsižvelgdama į rinkos situaciją", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T8", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Strateginis suderinamumas", "kat": "Strategija", "q": "Vadovų komanda subalansuoja trumpalaikius prioritetus su ilgalaikiais strateginiais tikslais", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T9", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Komunikacija ir bendradarbiavimas", "kat": "Strategija", "q": "Komunikacija vadovų komandoje yra atvira ir skaidri", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T10", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Komunikacija ir bendradarbiavimas", "kat": "Strategija", "q": "Vadovų komanda skatina ir fasilituoja tarpfunkcinį/ tarpskyrinį bendradarbiavimą", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T11", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Komunikacija ir bendradarbiavimas", "kat": "Įgyvendinimas", "q": "Vadovų komanda veiksmingai komunikuoja ir bendradarbiauja su kitais skyriais", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T12", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Sprendimų priėmimas", "kat": "Strategija", "q": "Visi vadovų komandos nariai jaučiasi įtraukti ir pilnavertiškai dalyvaujantys pagrindinių sprendimų priėmime", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T13", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Sprendimų priėmimas", "kat": "Įgyvendinimas", "q": "Vadovų komanda nuosekliai priima sprendimus, atspindinčius organizacijos pagrindines vertybes", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T14", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Sprendimų priėmimas", "kat": "Įgyvendinimas", "q": "Priimdama sprendimus vadovų komanda operuoja duomenimis", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T15", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Sprendimų priėmimas", "kat": "Įgyvendinimas", "q": "Vadovų komanda veiksmingai valdo vidinius konfliktus ir skirtingas nuomones sprendimų priėmimo proceso metu", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T16", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Atsakomybė ir veiklos rezultatai", "kat": "Įgyvendinimas", "q": "Vadovų komandoje vaidmenys ir atsakomybės yra aiškiai apibrėžtos", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T17", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Atsakomybė ir veiklos rezultatai", "kat": "Įgyvendinimas", "q": "Vadovų komanda užtikrina atskaitomybę už savo ir kitų rezultatų pasiekimą", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T18", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Atsakomybė ir veiklos rezultatai", "kat": "Įgyvendinimas", "q": "Vadovų komanda įtraukia darbuotojus į tikslų kėlimą", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T19", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Atsakomybė ir veiklos rezultatai", "kat": "Įgyvendinimas", "q": "Vadovų komanda reguliariai peržiūri ir vertina savo veiklos rezultatus", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T20", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Prisitaikymas ir atsparumas", "kat": "Įgyvendinimas", "q": "Vadovų komanda lanksčiai prisitaiko prie pokyčių vidinėje ir išorinėje aplinkoje", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T21", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Prisitaikymas ir atsparumas", "kat": "Įgyvendinimas", "q": "Vadovų komanda efektyviai valdo ir reaguoja į krizes ar netikėtus iššūkius", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T22", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Prisitaikymas ir atsparumas", "kat": "Įgyvendinimas", "q": "Vadovų komanda demonstruoja susitelkimą ir tinkamų sprendimų priėmimą esant blogiems rezultatams ir nepasiektiems tikslams", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T23", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Prisitaikymas ir atsparumas", "kat": "Įgyvendinimas", "q": "Vadovų komanda yra atspari išlaikydama veiklos rezultatus esant spaudimui", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T24", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Inovacijos ir nuolatinis tobulėjimas", "kat": "Strategija", "q": "Vadovų komanda yra skatinanti ir palaikanti nuolatinį mokymąsi ir profesinį tobulėjimą", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T25", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Inovacijos ir nuolatinis tobulėjimas", "kat": "Strategija", "q": "Vadovų komanda proaktyviai ieško ir įgyvendina novatoriškas idėjas", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T26", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Inovacijos ir nuolatinis tobulėjimas", "kat": "Įgyvendinimas", "q": "Vadovų komanda apmąsto ir mokosi iš praeities patirčių ir klaidų", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T27", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Vadovų komandos dinamika ir pasitikėjimas", "kat": "Strategija", "q": "Vadovų komandos tarpusavio pasitikėjimas yra aukštas", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T28", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Vadovų komandos dinamika ir pasitikėjimas", "kat": "Įgyvendinimas", "q": "Vadovų komanda prioritetizuoja organizacijos sėkmę prieš individualius tikslus", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T29", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Vadovų komandos dinamika ir pasitikėjimas", "kat": "Įgyvendinimas", "q": "Vadovų komanda efektyviai dirba kartu, spręsdama problemas ir įveikdama iššūkius", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T30", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Vadovų komandos dinamika ir pasitikėjimas", "kat": "Strategija", "q": "Vadovų komanda puoselėja pagarbos ir įtraukties kultūrą", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T31", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Vadovų komandos dinamika ir pasitikėjimas", "kat": "Įgyvendinimas", "q": "Vadovų komanda reaguoja į darbuotojų atsiliepimus", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T32", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Vadovų komandos dinamika ir pasitikėjimas", "kat": "Strategija", "q": "Vadovų komanda darbuotojams yra matoma ir pasiekiama visuose organizacijos lygmenyse", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T33", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Santykis su Valdyba", "kat": "Strategija", "q": "Vadovų komanda efektyviai bendradarbiauja su Valdyba, siekdama suderinti strateginius prioritetus", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T34", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Santykis su Valdyba", "kat": "Įgyvendinimas", "q": "Vadovų komanda aiškiai komunikuoja organizacijos veiklos rezultatus, rizikas ir galimybes valdybai", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}, {"id": "T35", "grp": "team", "top": true, "vad": true, "hr": false, "tema": "Santykis su Valdyba", "kat": "Įgyvendinimas", "q": "Vaidmenys ir atsakomybės tarp vadovų komandos ir valdybos yra aiškiai apibrėžti", "opts": [["Taip", 1], ["Iš dalies", 0.5], ["Ne", 0]]}];
+const BY = Object.fromEntries(BANK.map(q=>[q.id,q]));
+
+/* Dynamic wording by organisation size (Excel Q73 encodes the size rule in the text) */
+const SIZE_TEXT = { Q73:{ s:'Organizacija turi ne daugiau kaip 3 valdymo lygius (įskaitant vadovą)', m:'Organizacija turi ne daugiau kaip 4 valdymo lygius (įskaitant vadovą)', l:'Organizacija turi ne daugiau kaip 5 valdymo lygius (įskaitant vadovą)' } };
+
+/* Topics: gate (vartų klausimas) → if fully met: verify (patikra); else: drill (gilinimasis) */
+const TOPICS = {
+  lyderyste:   {name:'Lyderystė',                       gate:'Q114', verify:'Q113', drill:['Q111','Q112','Q115']},
+  talentai:    {name:'Talentų valdymas ir pakaitumas',  gate:'Q76',  verify:'Q74',  drill:['Q75','Q78','Q80']},
+  struktura:   {name:'Organizacinė struktūra',          gate:'Q69',  verify:'Q71',  drill:['Q72','Q73','Q70']},
+  hrkomp:      {name:'HR funkcijos kompetencija',       gate:'Q54',  verify:'Q55',  drill:['Q53','Q55']},
+  etika:       {name:'Vertybės, etika ir įtrauktis',    gate:'Q46',  verify:'Q48',  drill:['Q49','Q51','Q52']},
+  atlygis:     {name:'Atlygis ir papildomos naudos',    gate:'Q10',  verify:'Q9',   drill:['Q7','Q13','Q17']},
+  teise:       {name:'Teisinė atitiktis',               gate:'Q96',  verify:'Q98',  drill:['Q95','Q97','Q99']},
+  hrtech:      {name:'Žmonių duomenys ir sistemos',     gate:'Q57',  verify:'Q58',  drill:['Q58','Q56']},
+  veikla:      {name:'Veiklos valdymas ir tikslai',     gate:'Q101', verify:'Q103', drill:['Q104','Q105','Q108']},
+  sauga:       {name:'Sveikata ir sauga',               gate:'Q90',  verify:'Q89',  drill:['Q88','Q92','Q93']},
+  ivedimas:    {name:'Naujų darbuotojų įvedimas',       gate:'Q43',  verify:'Q45',  drill:['Q38','Q42','Q44']},
+  atranka:     {name:'Atranka ir samda',                gate:'Q36',  verify:'Q34',  drill:['Q28','Q30','Q26']},
+  mokymas:     {name:'Mokymas ir tobulėjimas',          gate:'Q67',  verify:'Q68',  drill:['Q62','Q65','Q64']},
+  isitraukimas:{name:'Darbuotojų įsitraukimas',         gate:'Q3',   verify:'Q4',   drill:['Q2','Q4']},
+  santykiai:   {name:'Santykiai su darbuotojais',       gate:'Q84',  verify:'Q83',  drill:['Q81','Q82','Q86']},
+};
+/* Questions shown only when the profile says so */
+const CONDITIONS = { Q97:{size:['l'], label:'tik organizacijoms su 200+ darbuotojų (CSRD)'}, T35:{board:true, label:'tik jei organizacija turi valdybą'} };
+
+/* Core block answered by every executive: one question per management-team sub-theme */
+const CORE = ['T1','T5','T9','T14','T16','T21','T26','T27','T35'];
+
+const ROLES = [
+  {id:'ceo',  name:'Generalinis direktorius / CEO',          sub:'Vadovų komanda, struktūra, pakaitumas', topics:['lyderyste','talentai','struktura','hrkomp']},
+  {id:'cfo',  name:'Finansų vadovas / CFO',                  sub:'Atlygis, atitiktis, duomenys',           topics:['atlygis','teise','hrtech','veikla']},
+  {id:'coo',  name:'Operacijų / gamybos vadovas / COO',      sub:'Sauga, veiklos valdymas, įvedimas',      topics:['sauga','veikla','struktura','ivedimas']},
+  {id:'cco',  name:'Pardavimų / komercijos vadovas',         sub:'Tikslai, kintamas atlygis, samda',       topics:['veikla','atlygis','atranka','talentai']},
+  {id:'chro', name:'Žmonių ir kultūros vadovas / HR',        sub:'Visos ŽV praktikos (ilgesnis, ~15 min)', topics:Object.keys(TOPICS), depth:1},
+  {id:'cto',  name:'IT / technologijų vadovas',              sub:'Sistemos, mokymasis, techninė samda',    topics:['hrtech','mokymas','atranka','ivedimas']},
+  {id:'cmo',  name:'Rinkodaros / komunikacijos vadovas',     sub:'Įsitraukimas, vertybės, santykiai',       topics:['isitraukimas','etika','santykiai','mokymas']},
+  {id:'other',name:'Kito padalinio vadovas',                 sub:'Pats pasirenkate 2–5 sritis, kurias išmanote', topics:['veikla','isitraukimas','mokymas']},
+];
+const SIZES = [{id:'s',name:'Iki 50 darbuotojų'},{id:'m',name:'50–199 darbuotojų'},{id:'l',name:'200 ir daugiau'}];
+const SEC_PER_Q = 25, MAX_TOPICS = 5, MIN_TOPICS = 2;
+const BANDS = [{min:90,name:'Išskirtinai aukšta',c:'var(--navy-ink)'},{min:75,name:'Aukšta',c:'var(--good)'},{min:50,name:'Vidutinė',c:'var(--mid)'},{min:25,name:'Augintina',c:'var(--warn)'},{min:0,name:'Žema',c:'var(--crit)'}];
+const band = p => BANDS.find(b=>p>=b.min);
+
+/* ===================== HELPERS ===================== */
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ls = {get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+let toastT; function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2200)}
+function copyText(txt){ return navigator.clipboard.writeText(txt).then(()=>toast('Nukopijuota')).catch(()=>toast('Pažymėkite tekstą ir nukopijuokite rankiniu būdu')) }
+function qText(id,profile){ const t=SIZE_TEXT[id]; return (t&&profile&&t[profile.size])||BY[id].q }
+function allowed(id,profile){ const c=CONDITIONS[id]; if(!c) return true; if(c.size&&!c.size.includes(profile.size)) return false; if(c.board&&!profile.board) return false; return true }
+function matrix(){ const m=ls.get('fba_matrix',null); const base=Object.fromEntries(ROLES.map(r=>[r.id,r.topics.slice()])); if(!m) return base; for(const k in base) if(m[k]) base[k]=m[k]; return base }
+function fmtMin(sec){ const m=Math.round(sec/60); return m<1?'<1 min':m+' min' }
+
+/* ===================== THE ALGORITHM ===================== */
+/* Builds the question path for a profile given the answers so far. Pure: same inputs → same path. */
+function buildPath(profile, answers){
+  const path=[]; const seen=new Set();
+  const push=(id,role,topic,why)=>{ if(seen.has(id)||!allowed(id,profile)) return; seen.add(id); path.push({id,role,topic,why}) };
+  CORE.forEach(id=>push(id,'core','core','Vadovų komandos blokas – atsako visi'));
+  const depth = profile.depth ?? 3;
+  profile.topics.forEach(tk=>{
+    const t=TOPICS[tk]; push(t.gate,'gate',tk,'Vartų klausimas');
+    const a=answers[t.gate]; if(a===undefined) return;            // tree stops here until the gate is answered
+    const score=BY[t.gate].opts[a][1];
+    if(score===1) push(t.verify,'verify',tk,'Vartai = „pilnai“ → viena patikra');
+    else t.drill.slice(0,depth).forEach(id=>push(id,'drill',tk,'Vartai = „iš dalies / ne“ → gilinimasis'));
+  });
+  return path;
+}
+/* Worst/best-case counts for the backend simulation */
+function simulate(roleId, size, board){
+  const m=matrix(); const topics=m[roleId]; const r=ROLES.find(x=>x.id===roleId); const depth=r.depth??3;
+  const prof={size,board,topics,depth};
+  const core=CORE.filter(id=>allowed(id,prof)).length;
+  let best=core, worst=core;
+  topics.forEach(tk=>{ const t=TOPICS[tk]; best+=1+ (allowed(t.verify,prof)?1:0); worst+=1+t.drill.slice(0,depth).filter(id=>allowed(id,prof)).length; });
+  return {best,worst:Math.max(best,worst),core};
+}
+function scoreByTopic(profile, answers){
+  const out={}; const path=buildPath(profile,answers);
+  path.forEach(p=>{ const a=answers[p.id]; if(a===undefined) return; const o=out[p.topic]||(out[p.topic]={got:0,max:0,n:0}); o.got+=BY[p.id].opts[a][1]; o.max+=1; o.n++; });
+  return out;
+}
+function encodeResult(profile, answers){
+  const payload={v:1,r:profile.role,s:profile.size,b:profile.board?1:0,t:profile.topics,a:answers,d:new Date().toISOString().slice(0,10)};
+  return 'FBA1-'+btoa(unescape(encodeURIComponent(JSON.stringify(payload)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function decodeResult(code){
+  const m=String(code).trim().match(/FBA1-([A-Za-z0-9_-]+)/); if(!m) return null;
+  try{ const b=m[1].replace(/-/g,'+').replace(/_/g,'/'); const json=decodeURIComponent(escape(atob(b+'='.repeat((4-b.length%4)%4)))); const p=JSON.parse(json);
+    const role=ROLES.find(r=>r.id===p.r); return {role:p.r,size:p.s,board:!!p.b,topics:p.t,depth:role?.depth??3,answers:p.a,date:p.d}; }catch(e){ return null }
+}
+
+/* ===================== SURVEY STATE ===================== */
+const fresh = screen=>({screen,profile:{role:null,size:null,board:null,topics:[],org:ORG_PARAM},answers:{},pos:0,sent:false,rid:newRid()});
+let S = ls.get('fba_state',null) || fresh('intro');
+if(ORG_PARAM) S.profile.org=ORG_PARAM; if(!S.rid) S.rid=newRid();
+function save(){ ls.set('fba_state',S) }
+function go(screen){ S.screen=screen; save(); renderSurvey(); window.scrollTo({top:0,behavior:'smooth'}) }
+
+function renderSurvey(){
+  const el=$('#survey'); const P=S.profile;
+  if(S.screen==='intro'){
+    el.innerHTML=`<div class="card hero">
+      <span class="eyebrow">Organizacijos diagnostika</span>
+      <h1>Vadovų komandos žvilgsnis į organizaciją</h1>
+      <div class="hero-rule"></div>
+      <p class="muted">Trumpas, Jūsų sričiai pritaikytas klausimynas. Atsakote tik apie tai, ką organizacijoje išmanote, o klausimų skaičius priklauso nuo Jūsų atsakymų: kur praktika veikia, einame toliau; kur ne, pasigiliname.</p>
+      <div class="facts"><div class="fact"><b>~10 min</b><span>vieno vadovo laikas</span></div><div class="fact"><b>15–25</b><span>klausimai vietoje 150</span></div><div class="fact"><b>3</b><span>atsakymo variantai</span></div></div>
+      <p class="small muted">${ENDPOINT?'Pabaigus atsakymai automatiškai perduodami Friisberg konsultantui. Vardo neprašome.':'Atsakymai lieka Jūsų naršyklėje. Pabaigoje gausite rezultatų kodą, kurį persiųsite konsultantui.'}</p>
+      <div class="row"><button class="btn" id="start">Pradėti</button>${Object.keys(S.answers).length?'<button class="btn ghost" id="resume">Tęsti pradėtą</button>':''}</div>
+    </div>`;
+    $('#start').onclick=()=>{ S=fresh('profile'); save(); renderSurvey() };
+    $('#resume')?.addEventListener('click',()=>go(P.topics.length?'questions':'profile'));
+    return;
+  }
+  if(S.screen==='profile'){
+    el.innerHTML=`<div class="stack">
+      <div><span class="eyebrow">1 žingsnis iš 3</span><h2>Kas Jūs organizacijoje?</h2><p class="muted small">Pagal vaidmenį parinksime sritis, kurias vertinsite.</p></div>
+      <div class="choices two" id="roles">${ROLES.map(r=>`<button class="choice" data-r="${r.id}" aria-pressed="${P.role===r.id}"><span class="dot"></span><span><b>${esc(r.name)}</b><small>${esc(r.sub)}</small></span></button>`).join('')}</div>
+      <div><h3>Organizacijos dydis</h3></div>
+      <div class="chips" id="sizes">${SIZES.map(s=>`<button class="chip" data-s="${s.id}" aria-pressed="${P.size===s.id}">${s.name}</button>`).join('')}</div>
+      <div><h3>Ar organizacija turi valdybą?</h3></div>
+      <div class="chips" id="board"><button class="chip" data-b="1" aria-pressed="${P.board===true}">Taip</button><button class="chip" data-b="0" aria-pressed="${P.board===false}">Ne</button></div>
+      ${ORG_PARAM?`<p class="small muted">Organizacija: <b>${esc(ORG_PARAM)}</b></p>`:`<div><h3>Organizacija</h3></div><input type="text" id="org" value="${esc(P.org||'')}" placeholder="Įmonės pavadinimas" autocomplete="organization" style="width:100%;max-width:420px">`}
+      <div class="row spread"><button class="btn ghost" id="back">Atgal</button><button class="btn" id="next" ${P.role&&P.size&&P.board!==null&&(P.org||'').trim()?'':'disabled'}>Toliau</button></div>
+    </div>`;
+    el.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{P.role=b.dataset.r;P.topics=matrix()[P.role].slice();save();renderSurvey()});
+    el.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{P.size=b.dataset.s;save();renderSurvey()});
+    el.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{P.board=b.dataset.b==='1';save();renderSurvey()});
+    $('#back').onclick=()=>go('intro'); $('#next').onclick=()=>go('topics');
+    $('#org')?.addEventListener('input',e=>{P.org=e.target.value;save();$('#next').disabled=!(P.role&&P.size&&P.board!==null&&P.org.trim())});
+    return;
+  }
+  if(S.screen==='topics'){
+    const role=ROLES.find(r=>r.id===P.role); const depth=role.depth??3;
+    const prof={...P,depth};
+    const est=(()=>{ const core=CORE.filter(id=>allowed(id,prof)).length; let b=core,w=core; P.topics.forEach(tk=>{const t=TOPICS[tk]; b+=1+(allowed(t.verify,prof)?1:0); w+=1+t.drill.slice(0,depth).filter(id=>allowed(id,prof)).length}); return {b,w} })();
+    const max = role.id==='chro'?Object.keys(TOPICS).length:MAX_TOPICS;
+    el.innerHTML=`<div class="stack">
+      <div><span class="eyebrow">2 žingsnis iš 3</span><h2>Jūsų vertinamos sritys</h2><p class="muted small">Parinkta pagal vaidmenį „${esc(role.name)}“. Galite pakeisti: palikite tik tas sritis, kurias organizacijoje tikrai išmanote (${MIN_TOPICS}–${max}).</p></div>
+      <div class="chips" id="topics">${Object.entries(TOPICS).map(([k,t])=>{const on=P.topics.includes(k);const dis=!on&&P.topics.length>=max;return `<button class="chip" data-t="${k}" aria-pressed="${on}" ${dis?'disabled':''}>${esc(t.name)}</button>`}).join('')}</div>
+      <div class="hint">Visada įeina <b>vadovų komandos blokas</b> (${CORE.filter(id=>allowed(id,prof)).length} kl.), kurį atsako kiekvienas komandos narys. Numatomas klausimų skaičius: <b class="tabular">${est.b}–${est.w}</b> · laikas <b>${fmtMin(est.b*SEC_PER_Q)}–${fmtMin(est.w*SEC_PER_Q)}</b>.</div>
+      <div class="row spread"><button class="btn ghost" id="back">Atgal</button><button class="btn" id="next" ${P.topics.length>=MIN_TOPICS?'':'disabled'}>Pradėti klausimus</button></div>
+    </div>`;
+    el.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{const k=b.dataset.t;const i=P.topics.indexOf(k);if(i>=0)P.topics.splice(i,1);else P.topics.push(k);save();renderSurvey()});
+    $('#back').onclick=()=>go('profile'); $('#next').onclick=()=>{S.pos=0;go('questions')};
+    return;
+  }
+  if(S.screen==='questions'){
+    const role=ROLES.find(r=>r.id===P.role); const prof={...P,depth:role.depth??3};
+    const path=buildPath(prof,S.answers);
+    if(S.pos>=path.length){ go('result'); return }
+    const node=path[S.pos]; const q=BY[node.id]; const a=S.answers[node.id];
+    // estimate remaining: unanswered gates could still branch
+    const est=(()=>{ let n=path.length; P.topics.forEach(tk=>{ if(S.answers[TOPICS[tk].gate]===undefined) n+= (TOPICS[tk].drill.slice(0,prof.depth).filter(id=>allowed(id,prof)).length) }); return n })();
+    const pct=Math.round((S.pos)/est*100);
+    const area = node.role==='core' ? 'Vadovų komanda · '+q.tema : TOPICS[node.topic].name;
+    const branch = node.role==='verify' ? 'Patikros klausimas: pasakėte, kad praktika veikia pilnai – patikriname vienu klausimu.' : node.role==='drill' ? 'Gilinimasis: ankstesnis atsakymas rodė spragą šioje srityje.' : '';
+    el.innerHTML=`<div class="stack">
+      <div class="progress" aria-label="Eiga"><i style="width:${pct}%"></i></div>
+      <div class="qmeta"><span>${esc(area)}</span><span class="tabular">${S.pos+1} iš ~${est}</span></div>
+      <div class="card stack">
+        ${branch?`<p class="branch-note">${branch}</p>`:''}
+        <p class="qtext">${esc(qText(node.id,prof))}</p>
+        <div class="answers">${q.opts.map((o,i)=>`<button class="answer" data-i="${i}" aria-pressed="${a===i}"><span class="k">${['A','B','C'][i]}</span><span>${esc(o[0])}</span></button>`).join('')}</div>
+      </div>
+      <div class="row spread"><button class="btn ghost sm" id="back">${S.pos===0?'Į sritis':'Ankstesnis'}</button><span class="small muted">${esc(q.kat)}</span></div>
+    </div>`;
+    el.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{ S.answers[node.id]=+b.dataset.i;
+      // answering a gate may change the path: drop stale answers of this topic's branch
+      if(node.role==='gate'){ const t=TOPICS[node.topic]; [t.verify,...t.drill].forEach(id=>{ if(id!==t.gate) delete S.answers[id] }); }
+      S.pos++; save(); renderSurvey(); window.scrollTo({top:0,behavior:'smooth'}) });
+    $('#back').onclick=()=>{ if(S.pos===0) go('topics'); else { S.pos--; save(); renderSurvey() } };
+    return;
+  }
+  if(S.screen==='result'){
+    const role=ROLES.find(r=>r.id===P.role); const prof={...P,depth:role.depth??3};
+    const sc=scoreByTopic(prof,S.answers); const code=encodeResult(prof,S.answers);
+    const tot=Object.values(sc).reduce((a,o)=>{a.got+=o.got;a.max+=o.max;return a},{got:0,max:0}); const pct=tot.max?Math.round(tot.got/tot.max*100):0; const b=band(pct);
+    const rows=Object.entries(sc).map(([k,o])=>{const p=Math.round(o.got/o.max*100);const bb=band(p);const name=k==='core'?'Vadovų komandos veikimas':TOPICS[k].name;return `<div class="bar" style="--bar-c:${bb.c}"><span class="lbl">${esc(name)}</span><span class="val tabular">${p}% · ${bb.name} · ${o.n} kl.</span><span class="track"><i style="width:${p}%"></i></span></div>`}).join('');
+    const strong=Object.entries(sc).filter(([k,o])=>o.got/o.max>=.75).map(([k])=>k==='core'?'Vadovų komanda':TOPICS[k].name);
+    const weak=Object.entries(sc).filter(([k,o])=>o.got/o.max<.5).map(([k])=>k==='core'?'Vadovų komanda':TOPICS[k].name);
+    el.innerHTML=`<div class="stack">
+      <div><span class="eyebrow">3 žingsnis iš 3 · baigta</span><h2>Ačiū. Jūsų žvilgsnis užfiksuotas.</h2></div>
+      <div class="card stack">
+        <div class="score-hero"><div class="ring" style="--p:${pct};--ring-c:${b.c}"><i>${pct}%</i></div><div><span class="pill" style="--pill:${b.c}">${b.name}</span><p style="margin-top:8px">Bendras Jūsų vertintų sričių brandos lygis. Komandos vaizdas susidės iš visų ${role.name.includes('HR')?'':'6–10 '}vadovų atsakymų.</p></div></div>
+        <div class="bars">${rows}</div>
+        ${strong.length?`<p class="small"><b>Stipru:</b> ${esc(strong.join(', '))}</p>`:''}${weak.length?`<p class="small"><b>Tobulintina:</b> ${esc(weak.join(', '))}</p>`:''}
+      </div>
+      ${ENDPOINT?'<div class="card" id="sendstatus"></div>':''}
+      <div class="card stack" id="codecard">
+        <h3>${ENDPOINT?'Atsarginis variantas: rezultatų kodas':'Rezultatų kodas konsultantui'}</h3>
+        <p class="small muted">${ENDPOINT?'Jei automatinis siuntimas nepavyktų, nukopijuokite šį kodą ir atsiųskite konsultantui.':'Nukopijuokite kodą ir atsiųskite jį Friisberg konsultantui (el. paštu ar žinute).'} Kode yra tik Jūsų vaidmuo ir atsakymai, be vardo.</p>
+        <div class="codebox" id="code">${code}</div>
+        <div class="row"><button class="btn accent" id="copy">Kopijuoti kodą</button><button class="btn ghost" id="again">Pildyti iš naujo</button></div>
+      </div>
+    </div>`;
+    $('#copy').onclick=()=>copyText(code);
+    if(ENDPOINT) submitResult({rid:S.rid,org:P.org,role:P.role,size:P.size,board:P.board,topics:P.topics,n:Object.keys(S.answers).length,pct,code});
+    $('#again').onclick=()=>{ S=fresh('intro'); save(); renderSurvey() };
+  }
+}
+
+/* ===================== BACKEND ===================== */
+let B = {tab: ls.get('fba_btab','algo'), role:'ceo', size:'m', board:true, filterTema:'', filterRole:'', codes: ls.get('fba_codes',''), remote: ls.get('fba_remote',[]), org: ls.get('fba_org',''), remoteMsg:''};
+function renderBackend(){
+  const el=$('#backend');
+  const tabs=[['algo','Algoritmas'],['tree','Sprendimų medis'],['matrix','Vaidmenų matrica'],['bank','Klausimų bankas'],['agg','Komandos rezultatai']];
+  let body='';
+  if(B.tab==='algo') body=renderAlgo();
+  if(B.tab==='tree') body=renderTree();
+  if(B.tab==='matrix') body=renderMatrix();
+  if(B.tab==='bank') body=renderBank();
+  if(B.tab==='agg') body=renderAgg();
+  el.innerHTML=`<div class="stack"><div><span class="eyebrow">Konsultanto vaizdas</span><h2>Kaip veikia klausimyno algoritmas</h2><p class="muted small">Čia matote visą logiką, pagal kurią kiekvienam vadovui sudaromas jo klausimų kelias. Nieko nėra paslėpta: tie patys duomenys valdo ir klausimyną.</p></div>
+    <div class="subnav">${tabs.map(([k,n])=>`<button data-tab="${k}" aria-current="${B.tab===k}">${n}</button>`).join('')}</div>${body}</div>`;
+  el.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{B.tab=b.dataset.tab;ls.set('fba_btab',B.tab);renderBackend()});
+  bindBackend();
+}
+function renderAlgo(){
+  const sims=ROLES.map(r=>{const s=simulate(r.id,'m',true);return `<tr><td>${esc(r.name)}</td><td class="c tabular">${matrix()[r.id].length}</td><td class="c tabular">${s.core}</td><td class="c tabular">${s.best}–${s.worst}</td><td class="c tabular">${fmtMin(s.best*SEC_PER_Q)}–${fmtMin(s.worst*SEC_PER_Q)}</td></tr>`}).join('');
+  const used=new Set(CORE); Object.values(TOPICS).forEach(t=>{used.add(t.gate);used.add(t.verify);t.drill.forEach(d=>used.add(d))});
+  return `<div class="stack">
+    <div class="flow">
+      <div class="step"><h3>Profilis</h3><p>Vadovas pasirenka vaidmenį, organizacijos dydį ir ar yra valdyba. Dydis ir valdyba įjungia arba išjungia atskirus klausimus.</p></div>
+      <div class="step"><h3>Sritys</h3><p>Vaidmuo parenka 4 sritis iš 15 (matrica). Vadovas gali jas pakeisti – paliekamos tik tos, kurias jis išmano. Riba: ${MIN_TOPICS}–${MAX_TOPICS}.</p></div>
+      <div class="step"><h3>Komandos blokas</h3><p>${CORE.length} klausimai apie vadovų komandos veikimą – po vieną iš kiekvienos potemės. Juos atsako visi, todėl matome sutarimą ir išsibarstymą.</p></div>
+      <div class="step"><h3>Vartų klausimas</h3><p>Kiekviena sritis prasideda vienu diagnostiniu klausimu. Jo atsakymas nulemia, kur medis šakojasi.</p></div>
+      <div class="step"><h3>Šaka</h3><p><b>Pilnai atitinka</b> → 1 patikros klausimas (pasitikime, bet patikriname). <b>Iš dalies / ne</b> → 2–3 gilinimosi klausimai, kad suprastume spragos priežastį.</p></div>
+      <div class="step"><h3>Balas</h3><p>Atsakymai vertinami 1 / 0,5 / 0 kaip Excel klausimyne. Srities branda = surinkta ÷ galima. Kodas persiunčiamas konsultantui ir agreguojamas komandos lygiu.</p></div>
+    </div>
+    <div class="rule-grid">
+      <div class="rule"><b>Kodėl 10 minučių</b><p>Vietoje 150 klausimų vadovas atsako 16–24. Skaičiuojame po ${SEC_PER_Q} s klausimui.</p></div>
+      <div class="rule m"><b>Kodėl patikra, kai „pilnai“</b><p>Vadovai linkę pervertinti savo sritį. Vienas konkretus įgyvendinimo klausimas rodo, ar praktika tikrai veikia.</p></div>
+      <div class="rule"><b>Kodėl gilinimasis, kai „ne“</b><p>Spragos priežastis būna skirtinga: nėra strategijos, nėra įrankio ar nėra disciplinos. Gilinimosi klausimai parinkti iš skirtingų kategorijų.</p></div>
+      <div class="rule m"><b>HR vadovui – kitaip</b><p>HR atsako visas 15 sričių, bet gilinimasis ribojamas 1 klausimu. Tai ilgiausias kelias (~15 min) ir atskaitos taškas kitų vadovų atsakymams.</p></div>
+      <div class="rule"><b>Brandos lygiai</b><p>${BANDS.map(b=>`${b.name} ≥${b.min}%`).join(' · ')}. Pagal Excel „Sheet1“ aprašą.</p></div>
+      <div class="rule m"><b>Klausimų banko panaudojimas</b><p>Medyje naudojami ${used.size} iš ${BANK.length} klausimų. Likusieji liko HR lygio detalėms – matomi skiltyje „Klausimų bankas“.</p></div>
+    </div>
+    <div><h3>Simuliacija pagal vaidmenį</h3><p class="small muted">Vidutinė organizacija (50–199) su valdyba. Geriausias atvejis: visi vartai „pilnai“. Blogiausias: visi vartai „iš dalies / ne“.</p></div>
+    <div class="tablewrap"><table><thead><tr><th>Vaidmuo</th><th class="c">Sritys</th><th class="c">Komandos kl.</th><th class="c">Klausimų</th><th class="c">Laikas</th></tr></thead><tbody>${sims}</tbody></table></div>
+  </div>`;
+}
+function renderTree(){
+  const m=matrix(); const role=ROLES.find(r=>r.id===B.role); const prof={size:B.size,board:B.board,topics:m[B.role],depth:role.depth??3};
+  const cond=id=>CONDITIONS[id]?`<span class="tag">${allowed(id,prof)?'įjungta':'praleista'}: ${esc(CONDITIONS[id].label)}</span>`:'';
+  const core=`<div class="tnode"><div class="tnode-h"><h3>Vadovų komandos blokas</h3><span class="tag core">Visiems · ${CORE.filter(id=>allowed(id,prof)).length} kl.</span></div>
+    ${CORE.map(id=>`<div class="qline" style="${allowed(id,prof)?'':'opacity:.45'}"><span class="id">${id}</span>${esc(BY[id].tema)}: ${esc(BY[id].q)} ${cond(id)}</div>`).join('')}</div>`;
+  const topics=prof.topics.map(tk=>{const t=TOPICS[tk];return `<div class="tnode">
+    <div class="tnode-h"><h3>${esc(t.name)}</h3><span class="tag gate">Vartai</span></div>
+    <p class="gateq"><span class="id">${t.gate}</span>${esc(qText(t.gate,prof))}</p>
+    <p class="small muted">Atsakymai: ${BY[t.gate].opts.map(o=>`${esc(o[0])} (${o[1]})`).join(' · ')}</p>
+    <div class="branches">
+      <div class="br yes"><div class="cond">Jei „${esc(BY[t.gate].opts[0][0])}“ (1) → patikra</div><div class="qline"><span class="id">${t.verify}</span>${esc(qText(t.verify,prof))} ${cond(t.verify)}</div></div>
+      <div class="br no"><div class="cond">Jei 0,5 arba 0 → gilinimasis (${t.drill.slice(0,prof.depth).length} kl.)</div>${t.drill.slice(0,prof.depth).map(id=>`<div class="qline" style="${allowed(id,prof)?'':'opacity:.45'}"><span class="id">${id}</span>${esc(qText(id,prof))} ${cond(id)}</div>`).join('')}</div>
+    </div></div>`}).join('');
+  const s=simulate(B.role,B.size,B.board);
+  return `<div class="stack">
+    <div class="row"><label class="small muted">Vaidmuo <select id="t-role">${ROLES.map(r=>`<option value="${r.id}" ${B.role===r.id?'selected':''}>${esc(r.name)}</option>`).join('')}</select></label>
+      <label class="small muted">Dydis <select id="t-size">${SIZES.map(x=>`<option value="${x.id}" ${B.size===x.id?'selected':''}>${x.name}</option>`).join('')}</select></label>
+      <label class="small muted">Valdyba <select id="t-board"><option value="1" ${B.board?'selected':''}>Yra</option><option value="0" ${!B.board?'selected':''}>Nėra</option></select></label>
+      <span class="small tabular">Kelias: ${s.best}–${s.worst} kl. · ${fmtMin(s.best*SEC_PER_Q)}–${fmtMin(s.worst*SEC_PER_Q)}</span></div>
+    <div class="tree">${core}${topics}</div>
+    <div class="legend"><span><i style="background:var(--blue)"></i>Komandos blokas</span><span><i style="background:var(--navy-ink)"></i>Vartų klausimas</span><span><i style="background:var(--good)"></i>Patikra (kai pilnai)</span><span><i style="background:var(--magenta)"></i>Gilinimasis (kai iš dalies / ne)</span></div>
+  </div>`;
+}
+function renderMatrix(){
+  const m=matrix(); const keys=Object.keys(TOPICS);
+  const head=`<tr><th>Vaidmuo</th>${keys.map(k=>`<th class="c" title="${esc(TOPICS[k].name)}">${esc(TOPICS[k].name.split(' ')[0])}</th>`).join('')}<th class="c">Iš viso</th></tr>`;
+  const rows=ROLES.map(r=>`<tr><td>${esc(r.name)}</td>${keys.map(k=>`<td class="c"><button class="mx" data-r="${r.id}" data-t="${k}" aria-pressed="${m[r.id].includes(k)}" aria-label="${esc(r.name)}: ${esc(TOPICS[k].name)}"></button></td>`).join('')}<td class="c tabular">${m[r.id].length}</td></tr>`).join('');
+  const cover=keys.map(k=>`<tr><td>${esc(TOPICS[k].name)}</td><td class="c tabular">${ROLES.filter(r=>m[r.id].includes(k)).length}</td><td>${esc(ROLES.filter(r=>m[r.id].includes(k)).map(r=>r.name.split(' /')[0]).join(', '))}</td></tr>`).join('');
+  return `<div class="stack">
+    <p class="small muted">Kuris vaidmuo kurias sritis gauna pagal nutylėjimą. Spustelėkite langelį, kad pakeistumėte – pakeitimas iškart galioja klausimynui šioje naršyklėje. Vadovas vis tiek gali koreguoti sritis pats.</p>
+    <div class="tablewrap"><table><thead>${head}</thead><tbody>${rows}</tbody></table></div>
+    <div class="row"><button class="btn ghost sm" id="mx-reset">Atstatyti numatytuosius</button><span class="small muted">${ls.get('fba_matrix',null)?'Naudojama Jūsų pakeista matrica.':'Naudojama numatytoji matrica.'}</span></div>
+    <div><h3>Sričių padengimas komandoje</h3><p class="small muted">Kiek vaidmenų vertina kiekvieną sritį. Sritis, kurią vertina 2+ vadovai, leidžia lyginti požiūrius.</p></div>
+    <div class="tablewrap"><table><thead><tr><th>Sritis</th><th class="c">Vaidmenų</th><th>Kas vertina</th></tr></thead><tbody>${cover}</tbody></table></div>
+  </div>`;
+}
+function roleInTree(id){
+  if(CORE.includes(id)) return ['core','Komandos blokas'];
+  for(const [k,t] of Object.entries(TOPICS)){ if(t.gate===id) return ['gate','Vartai · '+t.name]; if(t.verify===id) return ['verify','Patikra · '+t.name]; if(t.drill.includes(id)) return ['drill','Gilinimasis · '+t.name]; }
+  return ['', 'Nenaudojamas'];
+}
+function renderBank(){
+  const temas=[...new Set(BANK.map(q=>q.tema))];
+  const list=BANK.filter(q=>(!B.filterTema||q.tema===B.filterTema)&&(!B.filterRole||roleInTree(q.id)[0]===B.filterRole));
+  const rows=list.map(q=>{const [cls,lab]=roleInTree(q.id);return `<tr><td class="tabular"><span class="id" style="font-family:ui-monospace,Menlo,monospace;font-size:.75rem">${q.id}</span></td><td>${esc(q.tema)}</td><td class="small">${esc(q.kat)}</td><td>${esc(q.q)}${CONDITIONS[q.id]?`<br><span class="tag">${esc(CONDITIONS[q.id].label)}</span>`:''}</td><td class="small">${q.opts.map(o=>`${esc(o[0])} <span class="muted">(${o[1]})</span>`).join('<br>')}</td><td class="small">${[q.top?'Top':'',q.vad?'Vad.':'',q.hr?'HR':''].filter(Boolean).join(' · ')}</td><td><span class="tag ${cls}">${esc(lab)}</span></td></tr>`}).join('');
+  return `<div class="stack">
+    <div class="row"><label class="small muted">Tema <select id="f-tema"><option value="">Visos</option>${temas.map(t=>`<option ${B.filterTema===t?'selected':''}>${esc(t)}</option>`).join('')}</select></label>
+      <label class="small muted">Vaidmuo medyje <select id="f-role"><option value="">Visi</option><option value="core" ${B.filterRole==='core'?'selected':''}>Komandos blokas</option><option value="gate" ${B.filterRole==='gate'?'selected':''}>Vartai</option><option value="verify" ${B.filterRole==='verify'?'selected':''}>Patikra</option><option value="drill" ${B.filterRole==='drill'?'selected':''}>Gilinimasis</option><option value="" disabled>──</option></select></label>
+      <span class="small muted tabular">${list.length} iš ${BANK.length} klausimų</span></div>
+    <div class="tablewrap"><table><thead><tr><th>ID</th><th>Tema</th><th>Kategorija</th><th>Klausimas</th><th>Atsakymai (balas)</th><th>Excel: kam</th><th>Vaidmuo medyje</th></tr></thead><tbody>${rows}</tbody></table></div>
+  </div>`;
+}
+function renderAgg(){
+  // remote rows: newest per respondent id, filtered by organisation
+  const latest={}; B.remote.forEach(r=>{ if(B.org&&r.org!==B.org) return; const k=r.rid||r.code; if(!latest[k]||latest[k].t<r.t) latest[k]=r });
+  const remoteCodes=Object.values(latest).map(r=>r.code);
+  const codes=[...remoteCodes,...B.codes.split(/\s+/).filter(Boolean)]; const res=codes.map(decodeResult).filter(Boolean);
+  const orgs=[...new Set(B.remote.map(r=>r.org).filter(Boolean))].sort();
+  const remoteBox = ENDPOINT ? `<div class="card stack"><div class="row spread"><h3>Automatiškai surinkti atsakymai</h3><span class="small muted tabular">${B.remote.length} įrašų · ${remoteCodes.length} respondentai${B.org?' · '+esc(B.org):''}</span></div>
+      <div class="row"><button class="btn sm" id="rm-fetch">Atnaujinti iš Google Sheets</button><label class="small muted">Organizacija <select id="rm-org"><option value="">Visos</option>${orgs.map(o=>`<option ${B.org===o?'selected':''}>${esc(o)}</option>`).join('')}</select></label><a class="small" href="https://docs.google.com/spreadsheets/d/1rtQ_5sWZ9DgHvV8CRXulxY_lm3LAFxl5H6VTpAuSbh0/edit" target="_blank" rel="noopener">Atidaryti lentelę</a></div>
+      ${B.remoteMsg?`<p class="small muted">${esc(B.remoteMsg)}</p>`:''}</div>`
+    : `<div class="hint"><b>Automatinis surinkimas dar neįjungtas.</b> Įdiekite Apps Script pagal README (3 min) ir įrašykite Web app URL į <code>ENDPOINT</code>. Kol kas vadovų kodus įklijuokite žemiau.</div>`;
+  let body='';
+  if(res.length){
+    const topicAgg={}; const coreAgg={};
+    res.forEach(r=>{ const sc=scoreByTopic(r,r.answers); for(const k in sc){ const o=topicAgg[k]||(topicAgg[k]={sum:0,n:0,resp:0}); o.sum+=sc[k].got/sc[k].max; o.resp++; } CORE.forEach(id=>{ const a=r.answers[id]; if(a===undefined) return; const c=coreAgg[id]||(coreAgg[id]=[0,0,0]); c[a]++; }); });
+    const topicRows=Object.entries(topicAgg).sort((a,b)=>b[1].sum/b[1].resp-a[1].sum/a[1].resp).map(([k,o])=>{const p=Math.round(o.sum/o.resp*100);const bb=band(p);const name=k==='core'?'Vadovų komandos veikimas':TOPICS[k].name;return `<div class="bar" style="--bar-c:${bb.c}"><span class="lbl">${esc(name)}</span><span class="val tabular">${p}% · ${bb.name} · ${o.resp} resp.</span><span class="track"><i style="width:${p}%"></i></span></div>`}).join('');
+    const coreRows=CORE.filter(id=>coreAgg[id]).map(id=>{const c=coreAgg[id];const n=c[0]+c[1]+c[2];const cons=Math.round(Math.max(...c)/n*100);return `<tr><td class="small">${esc(BY[id].tema)}<br><span class="muted">${esc(BY[id].q)}</span></td><td style="min-width:140px"><div class="dist">${c.map((v,i)=>v?`<i style="width:${v/n*100}%;background:${['var(--good)','var(--warn)','var(--crit)'][i]}" title="${esc(BY[id].opts[i]?.[0]||'')}: ${v}"></i>`:'').join('')}</div></td><td class="c tabular">${c[0]} / ${c[1]} / ${c[2]}</td><td class="c tabular">${cons}%</td></tr>`}).join('');
+    const all=Object.values(topicAgg).reduce((a,o)=>{a.s+=o.sum;a.n+=o.resp;return a},{s:0,n:0}); const tot=Math.round(all.s/all.n*100);
+    const roleCount={}; res.forEach(r=>{roleCount[r.role]=(roleCount[r.role]||0)+1});
+    body=`<div class="kpis"><div class="kpi"><b class="tabular">${res.length}</b><span>respondentai</span></div><div class="kpi"><b class="tabular">${tot}%</b><span>bendra branda · ${band(tot).name}</span></div><div class="kpi"><b class="tabular">${Object.keys(topicAgg).length-1}</b><span>padengtos sritys iš ${Object.keys(TOPICS).length}</span></div><div class="kpi"><b class="tabular">${Object.keys(roleCount).length}</b><span>skirtingi vaidmenys</span></div></div>
+      <div><h3>Brandos profilis pagal sritį</h3><p class="small muted">Vidurkis tarp vadovų, kurie vertino sritį.</p></div><div class="card"><div class="bars">${topicRows}</div></div>
+      <div><h3>Vadovų komandos sutarimas</h3><p class="small muted">Atsakymų pasiskirstymas į komandos bloko klausimus. Sutarimas = dalis vadovų, pasirinkusių dažniausią atsakymą. Žemas sutarimas yra pati vertingiausia diskusijos tema.</p></div>
+      <div class="legend"><span><i style="background:var(--good)"></i>Taip / pilnai</span><span><i style="background:var(--warn)"></i>Iš dalies</span><span><i style="background:var(--crit)"></i>Ne</span></div>
+      <div class="tablewrap"><table><thead><tr><th>Klausimas</th><th>Pasiskirstymas</th><th class="c">Taip / iš dalies / ne</th><th class="c">Sutarimas</th></tr></thead><tbody>${coreRows}</tbody></table></div>
+      <div class="row"><button class="btn ghost sm" id="agg-csv">Kopijuoti CSV (visi atsakymai)</button><span class="small muted">${res.length} kodai iššifruoti${codes.length>res.length?`, ${codes.length-res.length} neatpažinti`:''}</span></div>`;
+  } else body=`<div class="hint">${ENDPOINT?'Spauskite „Atnaujinti iš Google Sheets“, kai vadovai pradės pildyti. ':''}Įklijuokite vadovų atsiųstus kodus (po vieną eilutėje) ir pamatysite komandos vaizdą: brandą pagal sritis ir sutarimą komandos bloke. Pavyzdinis kodas: <button class="btn ghost sm" id="agg-demo">įkelti 3 pavyzdinius kodus</button></div>`;
+  return `<div class="stack">
+    ${remoteBox}
+    <div><h3>${ENDPOINT?'Papildomi kodai (atsarginis kelias)':'Rezultatų kodai'}</h3><p class="small muted">${ENDPOINT?'Jei kuris vadovas atsiuntė kodą rankiniu būdu, įklijuokite jį čia – jis pridedamas prie automatiškai surinktų.':'Kiekvienas vadovas pabaigoje gauna kodą „FBA1-…“. Surinkite juos čia. Kodai saugomi tik šioje naršyklėje.'}</p></div>
+    <textarea id="codes" placeholder="FBA1-…">${esc(B.codes)}</textarea>
+    <div class="row"><button class="btn sm" id="agg-run">Agreguoti</button><button class="btn ghost sm" id="agg-clear">Išvalyti</button></div>
+    ${body}</div>`;
+}
+function demoCodes(){
+  const mk=(role,size,board,pick)=>{ const r=ROLES.find(x=>x.id===role); const prof={role,size,board,topics:matrix()[role],depth:r.depth??3}; const answers={};
+    for(let i=0;i<4;i++){ buildPath(prof,answers).forEach(p=>{ if(answers[p.id]===undefined){ const n=BY[p.id].opts.length; answers[p.id]=Math.min(n-1,pick(p.id)) } }) } return encodeResult(prof,answers) };
+  const h=s=>{let x=0;for(const c of s)x=(x*31+c.charCodeAt(0))%97;return x};
+  return [mk('ceo','m',true,id=>h(id)%3===0?1:0), mk('cfo','m',true,id=>h(id+'f')%4===0?2:h(id)%2), mk('coo','m',true,id=>h(id+'o')%3)].join('\n');
+}
+function bindBackend(){
+  $('#t-role')?.addEventListener('change',e=>{B.role=e.target.value;renderBackend()});
+  $('#t-size')?.addEventListener('change',e=>{B.size=e.target.value;renderBackend()});
+  $('#t-board')?.addEventListener('change',e=>{B.board=e.target.value==='1';renderBackend()});
+  document.querySelectorAll('.mx').forEach(b=>b.onclick=()=>{const m=matrix();const arr=m[b.dataset.r];const i=arr.indexOf(b.dataset.t);if(i>=0)arr.splice(i,1);else arr.push(b.dataset.t);ls.set('fba_matrix',m);renderBackend()});
+  $('#mx-reset')?.addEventListener('click',()=>{ls.del('fba_matrix');renderBackend()});
+  $('#f-tema')?.addEventListener('change',e=>{B.filterTema=e.target.value;renderBackend()});
+  $('#f-role')?.addEventListener('change',e=>{B.filterRole=e.target.value;renderBackend()});
+  $('#agg-run')?.addEventListener('click',()=>{B.codes=$('#codes').value;ls.set('fba_codes',B.codes);renderBackend()});
+  $('#rm-org')?.addEventListener('change',e=>{B.org=e.target.value;ls.set('fba_org',B.org);renderBackend()});
+  $('#rm-fetch')?.addEventListener('click',async()=>{ B.remoteMsg='Atnaujinama…'; renderBackend(); try{ B.remote=await fetchRemote(''); ls.set('fba_remote',B.remote); B.remoteMsg='Atnaujinta '+new Date().toLocaleTimeString('lt-LT',{hour:'2-digit',minute:'2-digit'}) }catch(e){ B.remoteMsg='Nepavyko pasiekti Google Sheets: '+e.message } renderBackend() });
+  $('#agg-clear')?.addEventListener('click',()=>{B.codes='';ls.del('fba_codes');renderBackend()});
+  $('#agg-demo')?.addEventListener('click',()=>{B.codes=demoCodes();ls.set('fba_codes',B.codes);renderBackend()});
+  $('#agg-csv')?.addEventListener('click',()=>{ const res=B.codes.split(/\s+/).map(decodeResult).filter(Boolean); const lines=['respondentas;vaidmuo;dydis;valdyba;klausimo_id;tema;klausimas;atsakymas;balas'];
+    res.forEach((r,i)=>{ for(const id in r.answers){ const q=BY[id]; const o=q.opts[r.answers[id]]; lines.push([i+1,r.role,r.size,r.board?1:0,id,q.tema,q.q,o[0],o[1]].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')) } });
+    copyText(lines.join('\n')) });
+}
+
+/* ===================== REMOTE (Google Sheets per Apps Script) ===================== */
+function setSendStatus(html){ const el=$('#sendstatus'); if(el) el.innerHTML=html }
+async function submitResult(payload){
+  if(S.sent){ setSendStatus('<p><b style="color:var(--good)">✓ Atsakymai perduoti konsultantui.</b> <span class="small muted">Daugiau nieko daryti nereikia.</span></p>'); return }
+  setSendStatus('<p class="small muted">Siunčiame atsakymus konsultantui…</p>');
+  try{
+    const r=await fetch(ENDPOINT,{method:'POST',body:JSON.stringify(payload)});
+    let ok=r.ok; try{ ok=ok&&(await r.json()).ok!==false }catch(e){}
+    if(!ok) throw new Error('bad response');
+    S.sent=true; save();
+    setSendStatus('<p><b style="color:var(--good)">✓ Atsakymai perduoti konsultantui.</b> <span class="small muted">Daugiau nieko daryti nereikia.</span></p>');
+  }catch(e){
+    setSendStatus('<p><b style="color:var(--warn)">Automatinis siuntimas nepavyko.</b> <span class="small muted">Nukopijuokite žemiau esantį kodą ir atsiųskite konsultantui.</span></p> <p style="margin-top:8px"><button class="btn ghost sm" id="retry">Bandyti dar kartą</button></p>');
+    $('#retry')?.addEventListener('click',()=>submitResult(payload));
+  }
+}
+async function fetchRemote(org){
+  const u=ENDPOINT+(org?'?org='+encodeURIComponent(org):'');
+  const r=await fetch(u); const j=await r.json(); if(!j.ok) throw new Error(j.error||'error'); return j.rows||[];
+}
+
+/* ===================== NAV ===================== */
+function showView(v){
+  const isB=v==='backend';
+  $('#survey').hidden=isB; $('#backend').hidden=!isB;
+  $('#nav-survey').setAttribute('aria-current',String(!isB)); $('#nav-backend').setAttribute('aria-current',String(isB));
+  if(isB) renderBackend(); else renderSurvey();
+}
+$('#nav-survey').onclick=()=>showView('survey'); $('#nav-backend').onclick=()=>showView('backend');
+showView(location.hash==='#backend'?'backend':'survey');
+</script>
+
+</body>
+</html>
